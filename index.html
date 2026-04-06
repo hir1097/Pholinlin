@@ -2,10 +2,21 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Khmer Menu & Order</title>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; background: #f4f4f4; color: #333; }
+        /* 核心修改2：增加 touch-action: manipulation 禁用双击缩放并移除点击延迟 */
+        body { 
+            font-family: -apple-system, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            margin: 0; 
+            background: #f4f4f4; 
+            color: #333; 
+            touch-action: manipulation; 
+            -webkit-text-size-adjust: 100%;
+        }
         header { padding: 10px; background: #fff; border-bottom: 1px solid #eee; text-align: center; position: sticky; top: 0; z-index: 100; }
         .lang-switch { display: flex; justify-content: center; gap: 8px; margin-bottom: 5px; }
         .lang-switch button { padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; font-size: 12px; cursor: pointer; }
@@ -25,7 +36,22 @@
 
         /* 数量控制按钮 */
         .stepper { display: flex; align-items: center; gap: 10px; }
-        .btn-step { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ff5722; background: #fff; color: #ff5722; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        /* 核心修改3：增加 user-select: none 防止快速点击时弹出系统菜单或选中文字 */
+        .btn-step { 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            border: 1px solid #ff5722; 
+            background: #fff; 
+            color: #ff5722; 
+            font-size: 18px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            user-select: none; 
+            -webkit-user-select: none; 
+        }
         .btn-step.add { background: #ff5722; color: #fff; }
         .count { font-weight: bold; min-width: 15px; text-align: center; }
 
@@ -206,7 +232,6 @@ function updateSummary() {
 }
 
 async function sendToTelegram() {
-    // 构造消息抬头，包含自动识别的桌号
     let message = `🪑 *桌号 / Bàn: ${tableNo}*\n`;
     message += `🔔 *New Order / Đơn hàng mới!*\n`;
     message += `--------------------------\n`;
@@ -217,9 +242,8 @@ async function sendToTelegram() {
         cat.items.forEach(item => {
             if (cart[item.id]) {
                 const itemTotal = cart[item.id] * item.price;
-                // 使用 vi (zh) 格式发送
                 message += `▪️ ${item.name.vi} (${item.name.zh})\n`;
-                message += `   SL: ${cart[item.id]} × $${item.price} = *$${itemTotal.toFixed(2)}*\n\n`;
+                message += `    SL: ${cart[item.id]} × $${item.price} = *$${itemTotal.toFixed(2)}*\n\n`;
                 totalPrice += itemTotal;
             }
         });
