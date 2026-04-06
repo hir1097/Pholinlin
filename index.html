@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Khmer Menu & Order</title>
     <style>
-        /* 核心修改2：增加 touch-action: manipulation 禁用双击缩放并移除点击延迟 */
         body { 
             font-family: -apple-system, sans-serif; 
             display: flex; 
@@ -34,9 +33,7 @@
         .name { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; }
         .price { color: #ff5722; font-weight: bold; }
 
-        /* 数量控制按钮 */
         .stepper { display: flex; align-items: center; gap: 10px; }
-        /* 核心修改3：增加 user-select: none 防止快速点击时弹出系统菜单或选中文字 */
         .btn-step { 
             width: 28px; 
             height: 28px; 
@@ -55,7 +52,6 @@
         .btn-step.add { background: #ff5722; color: #fff; }
         .count { font-weight: bold; min-width: 15px; text-align: center; }
 
-        /* 底部结算栏 */
         footer { padding: 15px; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         .cart-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
         #btn-order { background: #ff5722; color: #fff; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; }
@@ -94,11 +90,9 @@
 const TELEGRAM_TOKEN = '8765969177:AAEeOaaZDFo5upxMSvAhQ0mhRXVbmaIpB_o'; 
 const CHAT_ID = '-5238447566';
 
-// --- 方案2：自动识别桌号 ---
 const urlParams = new URLSearchParams(window.location.search);
 const tableNo = urlParams.get('table') || "未知桌号/Chưa rõ";
 
-// --- 菜单数据 ---
 const menuData = [
     {
         cat: { zh: "A.越南河粉", en: "A.PHO", km: "A.ហ្វឺ", vi: "A.Phở" },
@@ -203,8 +197,23 @@ function render() {
     updateSummary();
 }
 
+// 修改后的数量更新函数，包含 5 份限额逻辑
 function updateCart(itemId, delta) {
-    cart[itemId] = (cart[itemId] || 0) + delta;
+    const currentCount = cart[itemId] || 0;
+
+    // 限制：如果点加号且当前已经有 5 份
+    if (delta > 0 && currentCount >= 5) {
+        const limitMsgs = { 
+            zh: "每款餐点限购 5 份", 
+            en: "Limit 5 per item", 
+            km: "កំណត់ត្រឹម 5 ក្នុងមួយមុខ", 
+            vi: "Giới hạn 5 phần mỗi món" 
+        };
+        alert(limitMsgs[currentLang]);
+        return; 
+    }
+
+    cart[itemId] = currentCount + delta;
     if (cart[itemId] <= 0) delete cart[itemId];
     render();
 }
