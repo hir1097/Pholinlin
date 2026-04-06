@@ -54,7 +54,7 @@
 
         footer { padding: 15px; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         .cart-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
-        #btn-order { background: #ff5722; color: #fff; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; }
+        #btn-order { background: #ff5722; color: #fff; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
         #btn-order:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
@@ -197,11 +197,8 @@ function render() {
     updateSummary();
 }
 
-// 修改后的数量更新函数，包含 5 份限额逻辑
 function updateCart(itemId, delta) {
     const currentCount = cart[itemId] || 0;
-
-    // 限制：如果点加号且当前已经有 5 份
     if (delta > 0 && currentCount >= 5) {
         const limitMsgs = { 
             zh: "每款餐点限购 5 份", 
@@ -212,7 +209,6 @@ function updateCart(itemId, delta) {
         alert(limitMsgs[currentLang]);
         return; 
     }
-
     cart[itemId] = currentCount + delta;
     if (cart[itemId] <= 0) delete cart[itemId];
     render();
@@ -221,7 +217,6 @@ function updateCart(itemId, delta) {
 function updateSummary() {
     let totalQty = 0;
     let totalPrice = 0;
-    
     menuData.forEach(cat => {
         cat.items.forEach(item => {
             if (cart[item.id]) {
@@ -230,21 +225,29 @@ function updateSummary() {
             }
         });
     });
-
     const labels = { zh: "合计", en: "Total", km: "សរុប", vi: "Tổng" };
     document.getElementById('cart-count').innerText = `${labels[currentLang]}: ${totalQty}`;
     document.getElementById('cart-total').innerText = `$${totalPrice.toFixed(2)}`;
     
     const btnTexts = { zh: "點好了，發送訂單", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng" };
-    document.getElementById('btn-order').innerText = btnTexts[currentLang];
-    document.getElementById('btn-order').disabled = totalQty === 0;
+    const btn = document.getElementById('btn-order');
+    if (btn.getAttribute('data-sending') !== 'true') {
+        btn.innerText = btnTexts[currentLang];
+        btn.disabled = totalQty === 0;
+    }
 }
 
 async function sendToTelegram() {
-    let message = `🪑 *桌号 / Bàn: ${tableNo}*\n`;
-    message += `🔔 *New Order / Đơn hàng mới!*\n`;
-    message += `--------------------------\n`;
+    const btn = document.getElementById('btn-order');
+    const originalText = btn.innerText;
     
+    // 防止重复点击并提供反馈
+    btn.disabled = true;
+    btn.innerText = "Sending... / Đang gửi...";
+    btn.setAttribute('data-sending', 'true');
+
+    let message = `🪑 *桌号 / Bàn: ${tableNo}*\n`;
+    message += `🔔 *New Order!*\n--------------------------\n`;
     let totalPrice = 0;
 
     menuData.forEach(cat => {
@@ -257,7 +260,6 @@ async function sendToTelegram() {
             }
         });
     });
-
     message += `--------------------------\n💰 *Total: $${totalPrice.toFixed(2)}*`;
 
     const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -265,6 +267,7 @@ async function sendToTelegram() {
     try {
         const response = await fetch(url, {
             method: 'POST',
+            mode: 'cors', // 明确跨域
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: CHAT_ID,
@@ -274,14 +277,18 @@ async function sendToTelegram() {
         });
 
         if (response.ok) {
-            alert("Order sent successfully! / Gửi đơn hàng thành công!");
+            alert("✅ Success! / Gửi thành công!");
             cart = {}; 
             render();
         } else {
-            alert("Error sending order.");
+            const errData = await response.json();
+            alert("❌ Error: " + (errData.description || "Unknown"));
         }
     } catch (e) {
-        alert("Network error.");
+        alert("⚠️ Network Error! Please use Chrome or Safari.\n网络错误，请尝试使用 Chrome 浏览器打开。");
+    } finally {
+        btn.removeAttribute('data-sending');
+        updateSummary(); // 恢复按钮状态
     }
 }
 
