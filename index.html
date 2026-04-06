@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khmer Menu & Order</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; background: #f4f4f4; color: #333; }
+        header { padding: 10px; background: #fff; border-bottom: 1px solid #eee; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .lang-switch { display: flex; justify-content: center; gap: 8px; margin-bottom: 5px; }
+        .lang-switch button { padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; font-size: 12px; cursor: pointer; }
+        
+        .main { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 90px; background: #f8f8f8; overflow-y: auto; border-right: 1px solid #eee; }
+        .tab { padding: 20px 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 13px; text-align: center; color: #666; }
+        .tab.active { background: #fff; font-weight: bold; color: #ff5722; border-left: 4px solid #ff5722; }
+
+        #content { flex: 1; padding: 15px; overflow-y: auto; background: #fff; padding-bottom: 100px; }
+        .card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; align-items: center; }
+        .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #eee; flex-shrink: 0; }
+        
+        .info { flex: 1; }
+        .name { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; }
+        .price { color: #ff5722; font-weight: bold; }
+
+        /* 数量控制按钮 */
+        .stepper { display: flex; align-items: center; gap: 10px; }
+        .btn-step { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ff5722; background: #fff; color: #ff5722; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-step.add { background: #ff5722; color: #fff; }
+        .count { font-weight: bold; min-width: 15px; text-align: center; }
+
+        /* 底部结算栏 */
+        footer { padding: 15px; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+        .cart-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
+        #btn-order { background: #ff5722; color: #fff; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; }
+        #btn-order:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="lang-switch">
+        <button onclick="setLang('zh')">中文</button>
+        <button onclick="setLang('en')">EN</button>
+        <button onclick="setLang('km')">ខ្មែរ</button>
+        <button onclick="setLang('vi')">VN</button>
+    </div>
+</header>
+
+<div class="main">
+    <div id="sidebar"></div>
+    <div id="content">
+        <h2 id="cat-display" style="margin-top:0"></h2>
+        <div id="items-container"></div>
+    </div>
+</div>
+
+<footer>
+    <div class="cart-summary">
+        <span id="cart-count">Total: 0 items</span>
+        <span id="cart-total" style="color:#ff5722; font-size: 1.2em;">$0.00</span>
+    </div>
+    <button id="btn-order" onclick="sendToTelegram()">Send Order</button>
+</footer>
+
+<script>
+// --- 配置区 ---
+const TELEGRAM_TOKEN = '8765969177:AAEeOaaZDFo5upxMSvAhQ0mhRXVbmaIpB_o'; 
+const CHAT_ID = '-5238447566';
+
+// --- 方案2：自动识别桌号 ---
+const urlParams = new URLSearchParams(window.location.search);
+const tableNo = urlParams.get('table') || "未知桌号/Chưa rõ";
+
+// --- 菜单数据 ---
+const menuData = [
+    {
+        cat: { zh: "A.越南河粉", en: "A.PHO", km: "A.ហ្វឺ", vi: "A.Phở" },
+        items: [
+            { id: 1, name: { zh: "A1.越南牛肉河粉", en: "A1.Beef PHO", km: "A1.ហ្វឺសាច់គោ", vi: "A1.Phở bò" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 2, name: { zh: "A2.越南牛肉湯泡飯", en: "A2.Beef Soup with Rice", km: "A2.បាយស៊ុបសាច់គោ", vi: "A2.Cơm súp bò" }, price: 3, img: "img/IMG_2263.PNG" }
+        ]
+    },
+    {
+        cat: { zh: "B.高棉粿條", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer" },
+        items: [
+            { id: 3, name: { zh: "B1.高棉粿條", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu" }, price: 3, img: "img/IMG_2258.PNG" },
+            { id: 4, name: { zh: "B2.高棉粿條湯面線", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Bún súp Khmer" }, price: 3, img: "img/IMG_2258.PNG" },
+            { id: 5, name: { zh: "B3.高棉粿條湯泡飯", en: "B3.Khmer Soup Rice", km: "B3.បាយស៊ុប", vi: "B3.Cơm súp Khmer" }, price: 3, img: "img/IMG_2258.PNG" }
+        ]
+    },
+    {
+        cat: { zh: "C.柬式紅咖哩", en: "C.Khmer Curry", km: "C.ការីក្រហម", vi: "C.Cà ri Khmer" },
+        items: [
+            { id: 6, name: { zh: "C1.柬式紅咖哩面線", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
+            { id: 7, name: { zh: "C2.柬式紅咖哩法棍套餐", en: "C2.Red Curry with Baguette", km: "C2.នំបុ័ងការី", vi: "C2.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" }
+        ]
+    },
+    {
+        cat: { zh: "D.柬式米粉", en: "D.Nom Banh Chok", km: "D.នំបញ្ចុក", vi: "D.Bún Khmer" },
+        items: [
+            { id: 8, name: { zh: "D1.柬式米粉", en: "D1.Traditional Khmer Noodle", km: "D1.នំបញ្ចុកសម្លរប្រហើរ", vi: "D1.Bún Khmer truyền thống" }, price: 1.5, img: "img/IMG_2257.PNG" }
+        ]
+    },
+    {
+        cat: { zh: "E.經典牛肉粉", en: "E.Classic Beef", km: "E.គុយទាវសាច់គោ", vi: "E.Bún bò Huế" },
+        items: [
+            { id: 22, name: { zh: "E1.經典牛肉粉", en: "E1.Classic Beef Rice Noodle", km: "E1.គុយទាវសាច់គោពិសេស", vi: "E1.Bún Bò Huế" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 23, name: { zh: "E2.經典牛肉面線", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 24, name: { zh: "E3.經典牛肉湯泡飯", en: "E3.Classic Beef Soup Rice", km: "E3.បាយស៊ុបសាច់គោពិសេស", vi: "E3.Cơm súp bò đặc biệt" }, price: 3.5, img: "img/IMG_2256.PNG" }
+        ]
+    },
+    {
+        cat: { zh: "F.飯類", en: "F.Rice Dishes", km: "F.បាយ", vi: "F.Cơm" },
+        items: [
+            { id: 9, name: { zh: "F1.雞腿飯+煎蛋", en: "F1.Chicken Leg Rice + Egg", km: "F1.បាយមាន់+ពងទា", vi: "F1.Cơm đùi gà + Trứng" }, price: 3.5, img: "img/IMG_2259.PNG" },
+            { id: 10, name: { zh: "F2.雙槍雞腿飯+煎蛋", en: "F2.Double Chicken Leg Rice + Egg", km: "F2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "F2.Cơm 2 đùi gà + Trứng" }, price: 5.5, img: "img/IMG_2259.PNG" }
+        ]
+    },
+    {
+        cat: { zh: "G.單點", en: "G.Add-ons", km: "G.បន្ថែម", vi: "G.Thêm" },
+        items: [
+            { id: 11, name: { zh: "G1.單只炸雞腿", en: "G1.Fried Chicken Leg", km: "G1.ភ្លៅមាន់បំពង", vi: "G1.Đùi gà chiên" }, price: 2.5, img: "img/NO.png" },
+            { id: 12, name: { zh: "G2.煎蛋", en: "G2.Fried Egg", km: "G2.ពងទាចៀន", vi: "G2.Trứng chiên" }, price: 0.6, img: "img/NO.png" }
+        ]
+    },
+    {
+        cat: { zh: "Z.飲料", en: "Z.Drinks", km: "Z.ភេសជ្ជៈ", vi: "Z.Đồ uống" },
+        items: [
+            { id: 13, name: { zh: "Z1.越南煉乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá" }, price: 1.5, img: "img/NO.png" },
+            { id: 14, name: { zh: "Z2.東方樹葉烏龍茶", en: "Z2.Oolong Tea", km: "Z2.តែអ៊ូឡុង", vi: "Z2.Trà Ô Long" }, price: 1.5, img: "img/NO.png" },
+            { id: 15, name: { zh: "Z3.東方樹葉綠茶", en: "Z3.Green Tea", km: "Z3.តែបៃតង", vi: "Z3.Trà xanh" }, price: 1.5, img: "img/NO.png" },
+            { id: 16, name: { zh: "Z4.東方樹葉茉莉花茶", en: "Z4.Jasmine Tea", km: "Z4.តែម្លិះ", vi: "Z4.Trà lài" }, price: 1.5, img: "img/NO.png" },
+            { id: 17, name: { zh: "Z5.越南黑咖啡", en: "Z5.VN Black Coffee", km: "Z5.កាហ្វេខ្មៅ", vi: "Z5.Cà phê đen" }, price: 1, img: "img/NO.png" },
+            { id: 18, name: { zh: "Z6.可樂", en: "Z6.Coke", km: "Z6.កូកាឡា", vi: "Z6.Coca Cola" }, price: 1, img: "img/NO.png" },
+            { id: 19, name: { zh: "Z7.卡拉寶", en: "Z7.Carabao", km: "Z7.Carabao", vi: "Z7.Carabao" }, price: 1, img: "img/NO.png" },
+            { id: 20, name: { zh: "Z8.Sting", en: "Z8.Sting", km: "Z8.Sting", vi: "Z8.Sting" }, price: 1, img: "img/NO.png" },
+            { id: 21, name: { zh: "Z9.瓶裝水", en: "Z9.Water", km: "Z9.ទឹកបរិសុទ្ធ", vi: "Z9.Nước suối" }, price: 0.5, img: "img/NO.png" }
+        ]
+    }
+];
+
+let currentLang = 'zh';
+let currentCatIndex = 0;
+let cart = {}; 
+
+function render() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.innerHTML = menuData.map((data, index) => `
+        <div class="tab ${index === currentCatIndex ? 'active' : ''}" onclick="switchCat(${index})">
+            ${data.cat[currentLang]}
+        </div>
+    `).join('');
+
+    const catTitle = document.getElementById('cat-display');
+    catTitle.innerText = menuData[currentCatIndex].cat[currentLang];
+
+    const container = document.getElementById('items-container');
+    container.innerHTML = menuData[currentCatIndex].items.map(item => {
+        const count = cart[item.id] || 0;
+        return `
+            <div class="card">
+                <img class="item-img" src="${item.img}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                <div class="info">
+                    <span class="name">${item.name[currentLang]}</span>
+                    <span class="price">$${item.price}</span>
+                </div>
+                <div class="stepper">
+                    ${count > 0 ? `<button class="btn-step" onclick="updateCart(${item.id}, -1)">-</button>` : ''}
+                    ${count > 0 ? `<span class="count">${count}</span>` : ''}
+                    <button class="btn-step add" onclick="updateCart(${item.id}, 1)">+</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    updateSummary();
+}
+
+function updateCart(itemId, delta) {
+    cart[itemId] = (cart[itemId] || 0) + delta;
+    if (cart[itemId] <= 0) delete cart[itemId];
+    render();
+}
+
+function updateSummary() {
+    let totalQty = 0;
+    let totalPrice = 0;
+    
+    menuData.forEach(cat => {
+        cat.items.forEach(item => {
+            if (cart[item.id]) {
+                totalQty += cart[item.id];
+                totalPrice += cart[item.id] * item.price;
+            }
+        });
+    });
+
+    const labels = { zh: "合计", en: "Total", km: "សរុប", vi: "Tổng" };
+    document.getElementById('cart-count').innerText = `${labels[currentLang]}: ${totalQty}`;
+    document.getElementById('cart-total').innerText = `$${totalPrice.toFixed(2)}`;
+    
+    const btnTexts = { zh: "點好了，發送訂單", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng" };
+    document.getElementById('btn-order').innerText = btnTexts[currentLang];
+    document.getElementById('btn-order').disabled = totalQty === 0;
+}
+
+async function sendToTelegram() {
+    // 构造消息抬头，包含自动识别的桌号
+    let message = `🪑 *桌号 / Bàn: ${tableNo}*\n`;
+    message += `🔔 *New Order / Đơn hàng mới!*\n`;
+    message += `--------------------------\n`;
+    
+    let totalPrice = 0;
+
+    menuData.forEach(cat => {
+        cat.items.forEach(item => {
+            if (cart[item.id]) {
+                const itemTotal = cart[item.id] * item.price;
+                // 使用 vi (zh) 格式发送
+                message += `▪️ ${item.name.vi} (${item.name.zh})\n`;
+                message += `   SL: ${cart[item.id]} × $${item.price} = *$${itemTotal.toFixed(2)}*\n\n`;
+                totalPrice += itemTotal;
+            }
+        });
+    });
+
+    message += `--------------------------\n💰 *Total: $${totalPrice.toFixed(2)}*`;
+
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: message,
+                parse_mode: 'Markdown'
+            })
+        });
+
+        if (response.ok) {
+            alert("Order sent successfully! / Gửi đơn hàng thành công!");
+            cart = {}; 
+            render();
+        } else {
+            alert("Error sending order.");
+        }
+    } catch (e) {
+        alert("Network error.");
+    }
+}
+
+function setLang(lang) { currentLang = lang; render(); }
+function switchCat(index) { currentCatIndex = index; render(); document.getElementById('content').scrollTop = 0; }
+
+render();
+</script>
+
+</body>
+</html>
