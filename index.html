@@ -57,7 +57,7 @@
             background: #fff; 
             border-top: 1px solid #eee; 
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
-            position: absolute; /* 改为绝对定位，锁定在容器底部 */
+            position: absolute; 
             bottom: 0;
             left: 0;
             right: 0;
@@ -106,9 +106,12 @@ const OPEN_HOUR = 7;
 const CLOSE_HOUR = 19; 
 
 const urlParams = new URLSearchParams(window.location.search);
-const tableNo = urlParams.get('table') || "未知桌号/Chưa rõ";
-const orderStatus = urlParams.get('status');
 
+// --- 桌号预处理：转小写并校准 ---
+let rawTable = urlParams.get('table') || "";
+const tableNo = (rawTable.toLowerCase() === 'out') ? 'out' : rawTable;
+
+const orderStatus = urlParams.get('status');
 let currentLang = urlParams.get('lang') || 'zh';
 let currentCatIndex = 0;
 let cart = {}; 
@@ -130,8 +133,14 @@ const i18nMsgs = {
     error: {
         zh: "⚠️ 发送失败，请稍后重试。",
         en: "⚠️ Failed to send, please try again.",
-        km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត។",
+        km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត。",
         vi: "⚠️ Gửi thất bại, vui lòng thử lại sau."
+    },
+    invalidTable: {
+        zh: "⚠️ 无效桌号，请扫描桌上正确的二维码。",
+        en: "⚠️ Invalid table. Please scan the correct QR code on your table.",
+        km: "⚠️ លេខតុមិនត្រឹមត្រូវ។ សូមស្កេនកូដ QR នៅលើតុរបស់អ្នក។",
+        vi: "⚠️ Số bàn không hợp lệ. Vui lòng quét mã QR chính xác trên bàn."
     }
 };
 
@@ -148,22 +157,23 @@ const menuData = [
         cat: { zh: "A.越南河粉", en: "A.PHO", km: "A.ហ្វឺ", vi: "A.Phở" },
         items: [
             { id: 1, name: { zh: "A1.越南牛肉河粉", en: "A1.Beef PHO", km: "A1.ហ្វឺសាច់គោ", vi: "A1.Phở bò" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 2, name: { zh: "A2.越南牛肉湯泡飯", en: "A2.Beef Soup with Rice", km: "A2.បាយស៊ុបសាច់គោ", vi: "A2.Cơm súp bò" }, price: 3, img: "img/IMG_2263.PNG" }
+            { id: 2, name: { zh: "A2.越南牛肉河粉(大份)", en: "A2.Beef PHO (Large)", km: "A2.ហ្វឺសាច់គោ (ធំ)", vi: "A2.Phở bò (Lớn)" }, price: 5, img: "img/IMG_2263.PNG" },
+            { id: 25, name: { zh: "A3.越南牛肉湯泡飯", en: "A3.Beef Soup with Rice", km: "A3.បាយស៊ុបសាច់គោ", vi: "A3.Cơm súp bò" }, price: 3, img: "img/IMG_2263.PNG" }
         ]
     },
     {
         cat: { zh: "B.高棉粿條", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer" },
         items: [
-            { id: 3, name: { zh: "B1.高棉粿條", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu" }, price: 3, img: "img/IMG_2258.PNG" },
-            { id: 4, name: { zh: "B2.高棉粿條湯面線", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Bún súp Khmer" }, price: 3, img: "img/IMG_2258.PNG" },
-            { id: 5, name: { zh: "B3.高棉粿條湯泡飯", en: "B3.Khmer Soup Rice", km: "B3.បាយស៊ុប", vi: "B3.Cơm súp Khmer" }, price: 3, img: "img/IMG_2258.PNG" }
+            { id: 3, name: { zh: "B1.高棉粿條", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 4, name: { zh: "B2.高棉粿條湯面線", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Bún súp Khmer" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 5, name: { zh: "B3.高棉粿條湯泡飯", en: "B3.Khmer Soup Rice", km: "B3.បាយស៊ុប", vi: "B3.Cơm súp Khmer" }, price: 2.5, img: "img/IMG_2258.PNG" }
         ]
     },
     {
         cat: { zh: "C.柬式紅咖哩", en: "C.Khmer Curry", km: "C.ការីក្រហម", vi: "C.Cà ri Khmer" },
         items: [
             { id: 6, name: { zh: "C1.柬式紅咖哩面線", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
-            { id: 7, name: { zh: "C2.柬式紅咖哩法棍套餐", en: "C2.Red Curry with Baguette", km: "C2.នំបុ័ងការី", vi: "C2.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.png" }
+            { id: 7, name: { zh: "C2.柬式紅咖哩法棍套餐", en: "C2.Red Curry with Baguette", km: "C2.នំបុ័ងការី", vi: "C2.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" }
         ]
     },
     {
@@ -280,12 +290,18 @@ function updateSummary() {
     const btn = document.getElementById('btn-order');
     const closedInfo = document.getElementById('closed-info');
 
+    // --- [动态时间显示修改] ---
+    const formatH = (h) => h.toString().padStart(2, '0');
+    const timeRange = `${formatH(OPEN_HOUR)}:00 - ${formatH(CLOSE_HOUR)}:00`;
+
     const openingLabels = {
-        zh: "营业时间: 07:00 - 19:00",
-        en: "Business Hours: 07:00 - 19:00",
-        km: "ម៉ោងលក់ដូរ: 07:00 - 19:00",
-        vi: "Giờ mở cửa: 07:00 - 19:00"
+        zh: `营业时间: ${timeRange}`,
+        en: `Business Hours: ${timeRange}`,
+        km: `ម៉ោងលក់ដូរ: ${timeRange}`,
+        vi: `Giờ mở cửa: ${timeRange}`
     };
+    // --- 结束 ---
+
     closedInfo.innerText = openingLabels[currentLang];
     closedInfo.style.display = 'block';
 
@@ -313,6 +329,12 @@ function updateSummary() {
 }
 
 async function sendToTelegram() {
+    const validTables = ["1", "2", "3", "4", "5", "out"];
+    if (!validTables.includes(tableNo)) {
+        alert(i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.en);
+        return;
+    }
+
     if (!isOpening()) {
         alert(i18nMsgs.closed[currentLang] || i18nMsgs.closed.en);
         return;
@@ -322,7 +344,9 @@ async function sendToTelegram() {
     isSubmitting = true;
     updateSummary();
 
-    let message = `🪑 *桌号 / Bàn: ${tableNo}*\n`;
+    const displayTable = (tableNo === 'out') ? "OUT / 打包" : tableNo;
+
+    let message = `🪑 *桌号 / Bàn: ${displayTable}*\n`;
     message += `⏰ Time: ${new Date().toLocaleTimeString()}\n`;
     message += `🔔 *New Order!*\n--------------------------\n`;
     let totalPrice = 0;
