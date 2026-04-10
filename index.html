@@ -132,10 +132,11 @@ const TELEGRAM_TOKEN = '8765969177:AAGJmmNv8FxevpwzD61y5FHyzOule7545zk';
 const CHAT_ID = '-5238447566';
 const OPEN_HOUR = 7; 
 const CLOSE_HOUR = 19; 
+const DELIVERY_FEE = 0.5; // 房间配送费
 
 const urlParams = new URLSearchParams(window.location.search);
 let rawTable = urlParams.get('table') || "";
-const tableNo = (rawTable.toLowerCase() === 'out') ? 'out' : rawTable;
+const tableNo = rawTable.toLowerCase();
 
 const orderStatus = urlParams.get('status');
 let currentLang = urlParams.get('lang') || 'zh';
@@ -147,7 +148,13 @@ const i18nMsgs = {
     success: { zh: "✅ 订单已发送！", en: "✅ Order Sent!", km: "✅ បានបញ្ជូនការបញ្ជាទិញ!", vi: "✅ Gửi đơn hàng thành công!" },
     closed: { zh: "抱歉，我们已经打烊了！", en: "Sorry, we are closed!", km: "សូមទោស យើងត្រូវបានបិទ!", vi: "Xin lỗi, chúng tôi đã đóng cửa!" },
     error: { zh: "⚠️ 发送失败，请稍后重试。", en: "⚠️ Failed to send, please try again.", km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត。", vi: "⚠️ Gửi thất bại, vui lòng thử lại sau." },
-    invalidTable: { zh: "⚠️ 无效桌号，请扫描桌上正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code on your table.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ។ សូមស្កេនកូដ QR នៅលើតុរបស់អ្នក。", vi: "⚠️ Số bàn không hợp lệ. Vui lòng quét mã QR chính xác trên bàn." }
+    invalidTable: { zh: "⚠️ 无效桌号，请扫描桌上正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code on your table.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ។ សូមស្កេនកូដ QR នៅលើតុរបស់អ្នក。", vi: "⚠️ Số bàn không hợp lệ. Vui lòng quét mã QR chính xác trên bàn." },
+    inputRoom: { 
+        zh: "请输入您的房号：(须收取0.5$运费)", 
+        en: "Please enter your room number: ($0.50 delivery fee applies)", 
+        km: "សូមបញ្ចូលលេខបន្ទប់របស់អ្នក: (ថ្លៃដឹកជញ្ជូន 0.5$)", 
+        vi: "Vui lòng nhập số phòng của bạn: (Phí giao hàng là 0.5$)" 
+    }
 };
 
 const menuData = [
@@ -235,13 +242,6 @@ const menuData = [
     }
 ];
 
-if (orderStatus === 'done') {
-    setTimeout(() => {
-        alert(i18nMsgs.success[currentLang] || i18nMsgs.success.en);
-        const cleanUrl = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&lang=" + currentLang;
-        window.history.replaceState({}, document.title, cleanUrl);
-    }, 500);
-}
 
 function isOpening() {
     const now = new Date();
@@ -338,7 +338,7 @@ function updateSummary() {
 }
 
 async function sendToTelegram() {
-    const validTables = ["1", "2", "3", "4", "5", "out"];
+    const validTables = ["1", "2", "3", "4", "5", "out", "room"];
     if (!validTables.includes(tableNo)) {
         alert(i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.en);
         return;
@@ -348,29 +348,45 @@ async function sendToTelegram() {
         alert(i18nMsgs.closed[currentLang] || i18nMsgs.closed.en);
         return;
     }
+
+    let roomInfo = "";
+    if (tableNo === 'room') {
+        roomInfo = prompt(i18nMsgs.inputRoom[currentLang] || i18nMsgs.inputRoom.en);
+        if (!roomInfo) return; 
+    }
+
     if (isSubmitting) return;
-    
     isSubmitting = true;
     updateSummary();
 
-    const displayTable = (tableNo === 'out') ? "OUT / 打包" : tableNo;
+    let displayTable = "";
+    if (tableNo === 'room') displayTable = `🏢 房间 / Phòng: ${roomInfo}`;
+    else if (tableNo === 'out') displayTable = "🥡 打包 / Mang về";
+    else displayTable = `🪑 桌号 / Bàn: ${tableNo}`;
 
-    let message = `🪑 *桌号 / Bàn: ${displayTable}*\n`;
+    let message = `📍 *${displayTable}*\n`;
     message += `⏰ Time: ${new Date().toLocaleTimeString()}\n`;
     message += `🔔 *New Order!*\n--------------------------\n`;
-    let orderPrice = 0;
-
+    
+    let subTotal = 0;
     menuData.forEach(cat => {
         cat.items.forEach(item => {
             if (cart[item.id]) {
                 const itemTotal = cart[item.id] * item.price;
                 message += `▪️ ${item.name.vi} (${item.name.zh})\n`;
                 message += `    SL: ${cart[item.id]} × $${item.price} = *$${itemTotal.toFixed(2)}*\n\n`;
-                orderPrice += itemTotal;
+                subTotal += itemTotal;
             }
         });
     });
-    message += `--------------------------\n💰 *Total: $${orderPrice.toFixed(2)}*`;
+
+    let finalTotal = subTotal;
+    if (tableNo === 'room') {
+        finalTotal += DELIVERY_FEE;
+        message += `🚚 *Delivery Fee / Phí ship: $${DELIVERY_FEE.toFixed(2)}*\n`;
+    }
+
+    message += `--------------------------\n💰 *Total: $${finalTotal.toFixed(2)}*`;
 
     const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
     
@@ -387,6 +403,17 @@ async function sendToTelegram() {
         });
 
         if (response.ok) {
+            // 下单成功后的金额提示
+            let feeText = "";
+            if (tableNo === 'room') {
+                feeText = currentLang === 'zh' ? " (含0.5$运费)" : 
+                          currentLang === 'vi' ? " (Bao gồm 0.5$ phí ship)" : 
+                          currentLang === 'km' ? " (រួមទាំងសេវាដឹកជញ្ជូន 0.5$)" : 
+                          " (Incl. $0.50 delivery fee)";
+            }
+            const totalMsg = `${i18nMsgs.success[currentLang]}\n${currentLang === 'zh' ? '总计' : 'Total'}: $${finalTotal.toFixed(2)}${feeText}`;
+            alert(totalMsg);
+
             cart = {}; 
             window.location.href = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&status=done&lang=" + currentLang;
         } else {
