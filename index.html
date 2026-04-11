@@ -132,7 +132,12 @@ const TELEGRAM_TOKEN = '8765969177:AAGJmmNv8FxevpwzD61y5FHyzOule7545zk';
 const CHAT_ID = '-5238447566';
 const OPEN_HOUR = 7; 
 const CLOSE_HOUR = 19; 
-const DELIVERY_FEE = 0.5; // 房间配送费
+
+// --- 公寓配送配置 (Room Mode) ---
+const ROOM_DELIVERY_START = 10; // 开始时间 (10:00)
+const ROOM_DELIVERY_END = 18;   // 结束时间 (18:00)
+const DELIVERY_FEE = 0.5;       // 配送费
+const MIN_ROOM_AMOUNT = 2.0;    // 最低起送金额
 
 const urlParams = new URLSearchParams(window.location.search);
 let rawTable = urlParams.get('table') || "";
@@ -144,16 +149,31 @@ let currentCatIndex = 0;
 let cart = {}; 
 let isSubmitting = false; 
 
+// 格式化时间显示 (例如 10 -> 10:00)
+const fmtT = (h) => `${h.toString().padStart(2, '0')}:00`;
+
 const i18nMsgs = {
     success: { zh: "✅ 订单已发送！", en: "✅ Order Sent!", km: "✅ បានបញ្ជូនការបញ្ជាទិញ!", vi: "✅ Gửi đơn hàng thành công!" },
     closed: { zh: "抱歉，我们已经打烊了！", en: "Sorry, we are closed!", km: "សូមទោស យើងត្រូវបានបិទ!", vi: "Xin lỗi, chúng tôi đã đóng cửa!" },
     error: { zh: "⚠️ 发送失败，请稍后重试。", en: "⚠️ Failed to send, please try again.", km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត。", vi: "⚠️ Gửi thất bại, vui lòng thử lại sau." },
-    invalidTable: { zh: "⚠️ 无效桌号，请扫描桌上正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code on your table.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ។ សូមស្កេនកូដ QR នៅលើតុរបស់អ្នក。", vi: "⚠️ Số bàn không hợp lệ. Vui lòng quét mã QR chính xác trên bàn." },
+    invalidTable: { zh: "⚠️ 无效桌号，请扫描正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ។", vi: "⚠️ Số bàn không hợp lệ." },
     inputRoom: { 
-        zh: "请输入您的房号：(须收取0.5$运费)", 
-        en: "Please enter your room number: ($0.50 delivery fee applies)", 
-        km: "សូមបញ្ចូលលេខបន្ទប់របស់អ្នក: (ថ្លៃដឹកជញ្ជូន 0.5$)", 
-        vi: "Vui lòng nhập số phòng của bạn: (Phí giao hàng là 0.5$)" 
+        zh: `请输入您的房号：(须收取${DELIVERY_FEE}$运费)`, 
+        en: `Please enter your room number: ($${DELIVERY_FEE.toFixed(2)} fee applies)`, 
+        km: `សូមបញ្ចូលលេខបន្ទប់របស់អ្នក: (ថ្លៃដឹកជញ្ជូន ${DELIVERY_FEE}$)`, 
+        vi: `Vui lòng nhập số phòng của bạn: (Phí giao hàng là ${DELIVERY_FEE}$)` 
+    },
+    roomTimeErr: {
+        zh: `🏢 公寓配送时间为 ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}，现在无法下单。`,
+        en: `🏢 Apartment delivery is only available ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}.`,
+        km: `🏢 សេវាដឹកជញ្ជូនខុនដូមានចាប់ពីម៉ោង ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}។`,
+        vi: `🏢 Thời gian giao hàng chung cư là ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}.`
+    },
+    minAmountErr: {
+        zh: `🏢 公寓配送订单最低消费须满 $${MIN_ROOM_AMOUNT.toFixed(2)} (不含运费)。`,
+        en: `🏢 Minimum order for delivery is $${MIN_ROOM_AMOUNT.toFixed(2)} (excl. fee).`,
+        km: `🏢 ការបញ្ជាទិញខុនដូត្រូវមានយ៉ាងហោចណាស់ $${MIN_ROOM_AMOUNT.toFixed(2)}។`,
+        vi: `🏢 Đơn hàng chung cư tối thiểu phải từ $${MIN_ROOM_AMOUNT.toFixed(2)} (chưa ship).`
     }
 };
 
@@ -236,12 +256,11 @@ const menuData = [
             { id: 20, name: { zh: "Z7.可樂", en: "Z7.Coke", km: "Z7.កូកាឡា", vi: "Z7.Coca Cola" }, price: 1, img: "img/COKE.png" },
             { id: 21, name: { zh: "Z8.卡拉寶", en: "Z8.Carabao", km: "Z8.Carabao", vi: "Z8.Carabao" }, price: 1, img: "img/CARABAO.png" },
             { id: 27, name: { zh: "Z9.Sting", en: "Z9.Sting", km: "Z9.Sting", vi: "Z9.Sting" }, price: 1, img: "img/STING.png" },
-            { id: 19, name: { zh: "Z10.越南黑咖啡", en: "Z10.VN Black Coffee", km: "Z10.កាហ្វេខ្មៅ", vi: "Z10.Cà phê đen" }, price: 0.75, img: "img/BLOCKCOFFEE.png" },
+            { id: 19, name: { zh: "Z10.越南黑咖啡", en: "Z10.VN Black Coffee", km: "Z10.កាហ្វេខ្មៅ", vi: "Z10.Cà phê đen" }, price: 1, img: "img/BLOCKCOFFEE.png" },
             { id: 28, name: { zh: "Z11.瓶裝水", en: "Z11.Water", km: "Z11ទឹកបរិសុទ្ធ", vi: "Z11Nước suối" }, price: 0.5, img: "img/HITECH.png" }
         ]
     }
 ];
-
 
 function isOpening() {
     const now = new Date();
@@ -349,6 +368,30 @@ async function sendToTelegram() {
         return;
     }
 
+    // --- [核心修改] Room 模式验证：时间 + 最低消费 ---
+    if (tableNo === 'room') {
+        const now = new Date();
+        const hour = now.getHours();
+        if (hour < ROOM_DELIVERY_START || hour >= ROOM_DELIVERY_END) {
+            alert(i18nMsgs.roomTimeErr[currentLang] || i18nMsgs.roomTimeErr.en);
+            return;
+        }
+
+        let subTotalForCheck = 0;
+        menuData.forEach(cat => {
+            cat.items.forEach(item => {
+                if (cart[item.id]) {
+                    subTotalForCheck += cart[item.id] * item.price;
+                }
+            });
+        });
+
+        if (subTotalForCheck < MIN_ROOM_AMOUNT) {
+            alert(i18nMsgs.minAmountErr[currentLang] || i18nMsgs.minAmountErr.en);
+            return;
+        }
+    }
+
     let roomInfo = "";
     if (tableNo === 'room') {
         roomInfo = prompt(i18nMsgs.inputRoom[currentLang] || i18nMsgs.inputRoom.en);
@@ -403,13 +446,12 @@ async function sendToTelegram() {
         });
 
         if (response.ok) {
-            // 下单成功后的金额提示
             let feeText = "";
             if (tableNo === 'room') {
-                feeText = currentLang === 'zh' ? " (含0.5$运费)" : 
-                          currentLang === 'vi' ? " (Bao gồm 0.5$ phí ship)" : 
-                          currentLang === 'km' ? " (រួមទាំងសេវាដឹកជញ្ជូន 0.5$)" : 
-                          " (Incl. $0.50 delivery fee)";
+                feeText = currentLang === 'zh' ? ` (含${DELIVERY_FEE}$运费)` : 
+                          currentLang === 'vi' ? ` (Bao gồm ${DELIVERY_FEE}$ phí ship)` : 
+                          currentLang === 'km' ? ` (រួមទាំងសេវាដឹកជញ្ជូន ${DELIVERY_FEE}$)` : 
+                          ` (Incl. $${DELIVERY_FEE.toFixed(2)} delivery fee)`;
             }
             const totalMsg = `${i18nMsgs.success[currentLang]}\n${currentLang === 'zh' ? '总计' : 'Total'}: $${finalTotal.toFixed(2)}${feeText}`;
             alert(totalMsg);
