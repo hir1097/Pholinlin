@@ -201,7 +201,8 @@ const menuData = [
         items: [
             { id: 6, name: { zh: "C1.柬式紅咖哩面線", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
             { id: 26, name: { zh: "C2.柬式紅咖哩飯", en: "C2.Red Curry with Rice", km: "C2.បាយការីក្រហម", vi: "C2.Cơm cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
-            { id: 7, name: { zh: "C3.柬式紅咖哩法棍套餐", en: "C3.Red Curry with Baguette", km: "C3.នំបុ័ងការី", vi: "C3.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" }
+            { id: 7, name: { zh: "C3.柬式紅咖哩法棍套餐", en: "C3.Red Curry with Baguette", km: "C3.នំបុ័ងការី", vi: "C3.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" },
+            { id: 38, name: { zh: "C4.單點短法棍(2個)", en: "C4.Short Baguette (2 pcs)", km: "C4.នំបុ័ង (2)", vi: "C4.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
         ]
     },
     {
@@ -209,7 +210,8 @@ const menuData = [
         items: [
             { id: 8, name: { zh: "D1.柬式米粉", en: "D1.Traditional Khmer Noodle", km: "D1.នំបញ្ចុកសម្លរប្រហើរ", vi: "D1.Bún Khmer truyền thống" }, price: 1.5, img: "img/IMG_2257.PNG" },
             { id: 32, name: { zh: "D2.柬式米粉湯泡飯", en: "D2.Nom Banh Chok Soup with Rice", km: "D2.បាយស៊ុបនំបញ្ចុក", vi: "D2.Cơm súp Khmer" }, price: 1.5, img: "img/IMG_2257.PNG" },
-            { id: 33, name: { zh: "D3.柬式米粉湯法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" }
+            { id: 33, name: { zh: "D3.柬式米粉湯法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            { id: 38, name: { zh: "D4.單點短法棍(2個)", en: "D4.Short Baguette (2 pcs)", km: "D4.នំបុ័ង (2)", vi: "D4.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
         ]
     },
     {
@@ -230,13 +232,21 @@ const menuData = [
         ]
     },
     {
+        cat: { zh: "G.法棍系列", en: "G.Baguette", km: "G.ប្រភេទនំបុ័ង", vi: "G.Bánh mì" },
+        items: [
+            { id: 7, name: { zh: "G1.柬式紅咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" },
+            { id: 33, name: { zh: "G2.柬式米粉湯法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            { id: 38, name: { zh: "G3.越南短法棍(2個)", en: "G3.Short Baguette (2 pcs)", km: "G3.នំបុ័ង (2)", vi: "G3.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
+        ]
+    },
+    {
         cat: { zh: "X.飯類", en: "X.Rice Dishes", km: "X.បាយ", vi: "X.Cơm" },
         items: [
             { id: 9, name: { zh: "X1.雞腿飯+煎蛋", en: "X1.Chicken Leg Rice + Egg", km: "X1.បាយមាន់+ពងទា", vi: "X1.Cơm đùi gà + Trứng" }, price: 3.5, img: "img/IMG_2259.PNG" },
             { id: 10, name: { zh: "X2.雙槍雞腿飯+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng" }, price: 5.5, img: "img/IMG_2259.PNG" }
         ]
     },
-{
+    {
         cat: { zh: "Y.單點", en: "Y.Add-ons", km: "Y.បន្ថែម", vi: "Y.Thêm" },
         items: [
             { id: 11, name: { zh: "Y1.單只炸雞腿", en: "Y1.Fried Chicken Leg", km: "Y1.ភ្លៅមាន់បំពង", vi: "Y1.Đùi gà chiên" }, price: 2.5, img: "img/IMG_2316.PNG" },
@@ -314,9 +324,13 @@ function updateCart(itemId, delta) {
 function updateSummary() {
     let totalQty = 0;
     let totalPrice = 0;
+    
+    // 計算總計時過濾重複 ID，確保價格顯示準確
+    const processedCheck = new Set();
     menuData.forEach(cat => {
         cat.items.forEach(item => {
-            if (cart[item.id]) {
+            if (cart[item.id] && !processedCheck.has(item.id)) {
+                processedCheck.add(item.id);
                 totalQty += cart[item.id];
                 totalPrice += cart[item.id] * item.price;
             }
@@ -368,68 +382,74 @@ async function sendToTelegram() {
         return;
     }
 
-    if (tableNo === 'room') {
-        const now = new Date();
-        const hour = now.getHours();
-        if (hour < ROOM_DELIVERY_START || hour >= ROOM_DELIVERY_END) {
-            alert(i18nMsgs.roomTimeErr[currentLang] || i18nMsgs.roomTimeErr.en);
-            return;
-        }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); 
 
+    try {
         let subTotalForCheck = 0;
+        const checkDuplicate = new Set();
         menuData.forEach(cat => {
             cat.items.forEach(item => {
-                if (cart[item.id]) {
+                if (cart[item.id] && !checkDuplicate.has(item.id)) {
+                    checkDuplicate.add(item.id);
                     subTotalForCheck += cart[item.id] * item.price;
                 }
             });
         });
 
-        if (subTotalForCheck < MIN_ROOM_AMOUNT) {
-            alert(i18nMsgs.minAmountErr[currentLang] || i18nMsgs.minAmountErr.en);
-            return;
-        }
-    }
-
-    let roomInfo = "";
-    if (tableNo === 'room') {
-        roomInfo = prompt(i18nMsgs.inputRoom[currentLang] || i18nMsgs.inputRoom.en);
-        if (!roomInfo) return; 
-    }
-
-    if (isSubmitting) return;
-    isSubmitting = true;
-    updateSummary();
-
-    let displayTable = (tableNo === 'room') ? `🏢 房间 / Phòng: ${roomInfo}` : 
-                       (tableNo === 'out') ? "🥡 打包 / Mang về" : `🪑 桌号 / Bàn: ${tableNo}`;
-
-    let message = `📍 *${displayTable}*\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 *New Order!*\n--------------------------\n`;
-    let subTotal = 0;
-    menuData.forEach(cat => {
-        cat.items.forEach(item => {
-            if (cart[item.id]) {
-                const itemTotal = cart[item.id] * item.price;
-                message += `▪️ ${item.name.vi} (${item.name.zh})\n    SL: ${cart[item.id]} × $${item.price} = *$${itemTotal.toFixed(2)}*\n\n`;
-                subTotal += itemTotal;
+        if (tableNo === 'room') {
+            const now = new Date();
+            const hour = now.getHours();
+            if (hour < ROOM_DELIVERY_START || hour >= ROOM_DELIVERY_END) {
+                alert(i18nMsgs.roomTimeErr[currentLang] || i18nMsgs.roomTimeErr.en);
+                return;
             }
+
+            if (subTotalForCheck < MIN_ROOM_AMOUNT) {
+                alert(i18nMsgs.minAmountErr[currentLang] || i18nMsgs.minAmountErr.en);
+                return;
+            }
+        }
+
+        let roomInfo = "";
+        if (tableNo === 'room') {
+            roomInfo = prompt(i18nMsgs.inputRoom[currentLang] || i18nMsgs.inputRoom.en);
+            if (!roomInfo) return; 
+        }
+
+        if (isSubmitting) return;
+        isSubmitting = true;
+        updateSummary();
+
+        let displayTable = (tableNo === 'room') ? `🏢 房间 / Phòng: ${roomInfo}` : 
+                           (tableNo === 'out') ? "🥡 打包 / Mang về" : `🪑 桌号 / Bàn: ${tableNo}`;
+
+        let message = `📍 *${displayTable}*\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 *New Order!*\n--------------------------\n`;
+        
+        // --- 核心修正：使用 Set 過濾重複 ID 傳送 ---
+        let subTotal = 0;
+        const processedIds = new Set(); 
+
+        menuData.forEach(cat => {
+            cat.items.forEach(item => {
+                if (cart[item.id] && !processedIds.has(item.id)) {
+                    processedIds.add(item.id);
+                    const itemTotal = cart[item.id] * item.price;
+                    message += `▪️ ${item.name.vi} (${item.name.zh})\n    SL: ${cart[item.id]} × $${item.price} = *$${itemTotal.toFixed(2)}*\n\n`;
+                    subTotal += itemTotal;
+                }
+            });
         });
-    });
 
-    let finalTotal = subTotal;
-    if (tableNo === 'room') {
-        finalTotal += DELIVERY_FEE;
-        message += `🚚 *Delivery Fee / Phí ship: $${DELIVERY_FEE.toFixed(2)}*\n`;
-    }
-    message += `--------------------------\n💰 *Total: $${finalTotal.toFixed(2)}*`;
+        let finalTotal = subTotal;
+        if (tableNo === 'room') {
+            finalTotal += DELIVERY_FEE;
+            message += `🚚 *Delivery Fee / Phí ship: $${DELIVERY_FEE.toFixed(2)}*\n`;
+        }
+        message += `--------------------------\n💰 *Total: $${finalTotal.toFixed(2)}*`;
 
-    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-    
-    // --- [核心强化] 增加 10 秒超时控制 ---
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); 
-
-    try {
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+        
         const response = await fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -458,8 +478,6 @@ async function sendToTelegram() {
         clearTimeout(timeoutId);
         isSubmitting = false; 
         updateSummary();
-        
-        // 专门针对 iOS/Android 內置瀏覽器的提示
         const errorHint = currentLang === 'zh' ? 
             "⚠️ 传送超时或失败。\n請点击右上角「...」选择『在浏览器開啟』再下单！" : 
             "⚠️ Send failed or timeout.\nPlease click '...' and select 'Open in Browser' to order.";
