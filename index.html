@@ -119,10 +119,10 @@
 
 <footer>
     <div class="cart-summary">
-        <span id="cart-count">Total: 0 items</span>
+        <span id="cart-count">合计: 0 份</span>
         <span id="cart-total" style="color:#ff5722; font-size: 1.2em;">$0.00</span>
     </div>
-    <button id="btn-order" onclick="sendToTelegram()">Send Order</button>
+    <button id="btn-order" onclick="sendToTelegram()">发送订单</button>
     <div id="closed-info" class="closed-msg"></div>
 </footer>
 
@@ -143,7 +143,6 @@ const urlParams = new URLSearchParams(window.location.search);
 let rawTable = urlParams.get('table') || "";
 const tableNo = rawTable.toLowerCase();
 
-const orderStatus = urlParams.get('status');
 let currentLang = urlParams.get('lang') || 'zh';
 let currentCatIndex = 0;
 let cart = {}; 
@@ -176,98 +175,109 @@ const i18nMsgs = {
     }
 };
 
+// --- 加购品定义 ---
+const EXTRA_CHICKEN = { id: 11, name: { zh: "加购炸鸡腿", en: "Add Chicken Leg", km: "បន្ថែមភ្លៅមាន់បំពង", vi: "Thêm đùi gà chiên" }, price: 2.5, img: "img/IMG_2316.PNG" };
+const EXTRA_EGG = { id: 12, name: { zh: "加购煎蛋", en: "Add Fried Egg", km: "បន្ថែមពងទាចៀន", vi: "Thêm trứng chiên" }, price: 0.6, img: "img/EGG.PNG" };
+const EXTRA_COFFEE = { id: 13, name: { zh: "加购越南炼乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá" }, price: 1, img: "img/MILKCOFEE.png" };
+const EXTRA_BAGUETTE = { id: 38, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" };
+
 const menuData = [
     {
         cat: { zh: "A.越南河粉", en: "A.PHO", km: "A.ហ្វឺ", vi: "A.Phở" },
         items: [
             { id: 1, name: { zh: "A1.越南牛肉河粉", en: "A1.Beef PHO", km: "A1.ហ្វឺសាច់គោ", vi: "A1.Phở bò" }, price: 3, img: "img/IMG_2263.PNG" },
             { id: 2, name: { zh: "A2.越南牛肉河粉(大份)", en: "A2.Beef PHO (Large)", km: "A2.ហ្វឺសាច់គោ (ធំ)", vi: "A2.Phở bò (Lớn)" }, price: 5, img: "img/IMG_2263.PNG" },
-            { id: 29, name: { zh: "A3.越南牛肉湯麵線", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Bún bò" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 30, name: { zh: "A4.越南牛肉湯泡麵", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Mì bò" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 25, name: { zh: "A5.越南牛肉湯泡飯", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Cơm súp bò" }, price: 3, img: "img/IMG_2263.PNG" }
+            { id: 29, name: { zh: "A3.越南牛肉汤面线", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Bún bò" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 30, name: { zh: "A4.越南牛肉汤泡面", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Mì bò" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 25, name: { zh: "A5.越南牛肉汤泡饭", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Cơm súp bò" }, price: 3, img: "img/IMG_2263.PNG" },
+            EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
-        cat: { zh: "B.高棉粿條", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer" },
+        cat: { zh: "B.高棉粿条", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer" },
         items: [
-            { id: 3, name: { zh: "B1.高棉粿條", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 4, name: { zh: "B2.高棉粿條湯面線", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Bún súp Khmer" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 31, name: { zh: "B3.高棉粿條湯泡麵", en: "B3.Khmer Instant Noodle Soup", km: "B3.មីគុយទាវ", vi: "B3.Mì hủ tiếu" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 5, name: { zh: "B4.高棉粿條湯泡飯", en: "B4.Khmer Soup Rice", km: "B4.បាយស៊ុប", vi: "B4.Cơm súp Khmer" }, price: 2.5, img: "img/IMG_2258.PNG" }
+            { id: 3, name: { zh: "B1.高棉粿条", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 4, name: { zh: "B2.高棉粿条汤面线", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Bún súp Khmer" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 31, name: { zh: "B3.高棉粿条汤泡面", en: "B3.Khmer Instant Noodle Soup", km: "B3.មីគុយទាវ", vi: "B3.Mì hủ tiếu" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 5, name: { zh: "B4.高棉粿条汤泡饭", en: "B4.Khmer Soup Rice", km: "B4.បាយស៊ុប", vi: "B4.Cơm súp Khmer" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
-        cat: { zh: "C.柬式紅咖哩", en: "C.Khmer Curry", km: "C.ការីក្រហម", vi: "C.Cà ri Khmer" },
+        cat: { zh: "C.柬式红咖喱", en: "C.Khmer Curry", km: "C.ការីក្រហម", vi: "C.Cà ri Khmer" },
         items: [
-            { id: 6, name: { zh: "C1.柬式紅咖哩面線", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
-            { id: 26, name: { zh: "C2.柬式紅咖哩飯", en: "C2.Red Curry with Rice", km: "C2.បាយការីក្រហម", vi: "C2.Cơm cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
-            { id: 7, name: { zh: "C3.柬式紅咖哩法棍套餐", en: "C3.Red Curry with Baguette", km: "C3.នំបុ័ងការី", vi: "C3.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" },
-            { id: 38, name: { zh: "C4.單點短法棍(2個)", en: "C4.Short Baguette (2 pcs)", km: "C4.នំបុ័ង (2)", vi: "C4.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
+            { id: 6, name: { zh: "C1.柬式红咖喱面线", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
+            { id: 26, name: { zh: "C2.柬式红咖喱饭", en: "C2.Red Curry with Rice", km: "C2.បាយការីក្រហម", vi: "C2.Cơm cà ri" }, price: 2, img: "img/IMG_2260.PNG" },
+            { id: 7, name: { zh: "C3.柬式红咖喱法棍套餐", en: "C3.Red Curry with Baguette", km: "C3.នំបុ័ងការី", vi: "C3.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" },
+            EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
         cat: { zh: "D.柬式米粉", en: "D.Nom Banh Chok", km: "D.នំបញ្ចុក", vi: "D.Bún Khmer" },
         items: [
             { id: 8, name: { zh: "D1.柬式米粉", en: "D1.Traditional Khmer Noodle", km: "D1.នំបញ្ចុកសម្លរប្រហើរ", vi: "D1.Bún Khmer truyền thống" }, price: 1.5, img: "img/IMG_2257.PNG" },
-            { id: 32, name: { zh: "D2.柬式米粉湯泡飯", en: "D2.Nom Banh Chok Soup with Rice", km: "D2.បាយស៊ុបនំបញ្ចុក", vi: "D2.Cơm súp Khmer" }, price: 1.5, img: "img/IMG_2257.PNG" },
-            { id: 33, name: { zh: "D3.柬式米粉湯法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" },
-            { id: 38, name: { zh: "D4.單點短法棍(2個)", en: "D4.Short Baguette (2 pcs)", km: "D4.នំបុ័ង (2)", vi: "D4.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
+            { id: 32, name: { zh: "D2.柬式米粉汤泡饭", en: "D2.Nom Banh Chok Soup with Rice", km: "D2.បាយស៊ុបនំបញ្ចុក", vi: "D2.Cơm súp Khmer" }, price: 1.5, img: "img/IMG_2257.PNG" },
+            { id: 33, name: { zh: "D3.柬式米粉汤法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
-        cat: { zh: "E.經典牛肉粉", en: "E.Classic Beef", km: "E.គុយទាវសាច់គោ", vi: "E.Bún bò Huế" },
+        cat: { zh: "E.经典牛肉粉", en: "E.Classic Beef", km: "E.គុយទាវសាច់គោ", vi: "E.Bún bò Huế" },
         items: [
-            { id: 22, name: { zh: "E1.經典牛肉粉", en: "E1.Classic Beef Rice Noodle", km: "E1.គុយទាវសាច់គោពិសេស", vi: "E1.Bún Bò Huế" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 23, name: { zh: "E2.經典牛肉面線", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 34, name: { zh: "E3.經典牛肉湯泡麵", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 24, name: { zh: "E4.經典牛肉湯泡飯", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt" }, price: 3.5, img: "img/IMG_2256.PNG" }
+            { id: 22, name: { zh: "E1.经典牛肉粉", en: "E1.Classic Beef Rice Noodle", km: "E1.គុយទាវសាច់គោពិសេស", vi: "E1.Bún Bò Huế" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 23, name: { zh: "E2.经典牛肉面线", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 34, name: { zh: "E3.经典牛肉汤泡面", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 24, name: { zh: "E4.经典牛肉汤泡饭", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
-        cat: { zh: "F.越式蟹肉餅湯粉", en: "F.Crab Pork Cake Soup", km: "F.ស៊ុបខ្យងក្តាម", vi: "F.Bún riêu" },
+        cat: { zh: "F.越式蟹肉饼汤粉", en: "F.Crab Pork Cake Soup", km: "F.ស៊ុបខ្យងក្តាម", vi: "F.Bún riêu" },
         items: [
-            { id: 35, name: { zh: "F1.越式蟹肉餅湯麵", en: "F1.Crab Pork Cake with Instant Noodle", km: "F1.មីស៊ុបខ្យងក្តាម", vi: "F1.Mì riêu cua" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 36, name: { zh: "F2.越式蟹肉餅湯粉", en: "F2.Crab Pork Cake with Rice Noodle", km: "F2.នំបញ្ចុកស៊ុបខ្យងក្តាម", vi: "F2.Bún riêu cua" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 37, name: { zh: "F3.越式蟹肉餅飯", en: "F3.Crab Pork Cake with Rice", km: "F3.បាយស៊ុបខ្យងក្តាម", vi: "F3.Cơm riêu cua" }, price: 2.5, img: "img/IMG_3001.PNG" }
+            { id: 35, name: { zh: "F1.越式蟹肉饼汤面", en: "F1.Crab Pork Cake with Instant Noodle", km: "F1.មីស៊ុបខ្យងក្តាម", vi: "F1.Mì riêu cua" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 36, name: { zh: "F2.越式蟹肉饼汤粉", en: "F2.Crab Pork Cake with Rice Noodle", km: "F2.នំបញ្ចុកស៊ុបខ្យងក្តាម", vi: "F2.Bún riêu cua" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 37, name: { zh: "F3.越式蟹肉饼饭", en: "F3.Crab Pork Cake with Rice", km: "F3.បាយស៊ុបខ្យងក្តាម", vi: "F3.Cơm riêu cua" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
         cat: { zh: "G.法棍系列", en: "G.Baguette", km: "G.ប្រភេទនំបុ័ង", vi: "G.Bánh mì" },
         items: [
-            { id: 7, name: { zh: "G1.柬式紅咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" },
-            { id: 33, name: { zh: "G2.柬式米粉湯法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" },
-            { id: 38, name: { zh: "G3.越南短法棍(2個)", en: "G3.Short Baguette (2 pcs)", km: "G3.នំបុ័ង (2)", vi: "G3.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
+            { id: 7, name: { zh: "G1.柬式红咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri" }, price: 3.5, img: "img/IMG_2264.PNG" },
+            { id: 33, name: { zh: "G2.柬式米粉汤法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
-        cat: { zh: "X.飯類", en: "X.Rice Dishes", km: "X.បាយ", vi: "X.Cơm" },
+        cat: { zh: "X.饭类", en: "X.Rice Dishes", km: "X.បាយ", vi: "X.Cơm" },
         items: [
-            { id: 9, name: { zh: "X1.雞腿飯+煎蛋", en: "X1.Chicken Leg Rice + Egg", km: "X1.បាយមាន់+ពងទា", vi: "X1.Cơm đùi gà + Trứng" }, price: 3.5, img: "img/IMG_2259.PNG" },
-            { id: 10, name: { zh: "X2.雙槍雞腿飯+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng" }, price: 5.5, img: "img/IMG_2259.PNG" }
+            { id: 9, name: { zh: "X1.鸡腿饭+煎蛋", en: "X1.Chicken Leg Rice + Egg", km: "X1.បាយមាន់+ពងទា", vi: "X1.Cơm đùi gà + Trứng" }, price: 3.5, img: "img/IMG_2259.PNG" },
+            { id: 10, name: { zh: "X2.双枪鸡腿饭+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng" }, price: 5.5, img: "img/IMG_2259.PNG" },
+            EXTRA_CHICKEN, EXTRA_EGG, EXTRA_COFFEE
         ]
     },
     {
-        cat: { zh: "Y.單點", en: "Y.Add-ons", km: "Y.បន្ថែម", vi: "Y.Thêm" },
+        cat: { zh: "Y.单点", en: "Y.Add-ons", km: "Y.បន្ថែម", vi: "Y.Thêm" },
         items: [
-            { id: 11, name: { zh: "Y1.單只炸雞腿", en: "Y1.Fried Chicken Leg", km: "Y1.ភ្លៅមាន់បំពង", vi: "Y1.Đùi gà chiên" }, price: 2.5, img: "img/IMG_2316.PNG" },
+            { id: 11, name: { zh: "Y1.单只炸鸡腿", en: "Y1.Fried Chicken Leg", km: "Y1.ភ្លៅមាន់បំពង", vi: "Y1.Đùi gà chiên" }, price: 2.5, img: "img/IMG_2316.PNG" },
             { id: 12, name: { zh: "Y2.煎蛋", en: "Y2.Fried Egg", km: "Y2.ពងទាចៀន", vi: "Y2.Trứng chiên" }, price: 0.6, img: "img/EGG.PNG" },
-            { id: 38, name: { zh: "Y3.越南短法棍(2個)", en: "Y3.Short Baguette (2 pcs)", km: "Y3.នំបុ័ង (2)", vi: "Y3.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
+            { id: 38, name: { zh: "Y3.越南短法棍(2个)", en: "Y3.Short Baguette (2 pcs)", km: "Y3.នំបុ័ង (2)", vi: "Y3.Bánh mì ngắn (2 cái)" }, price: 0.5, img: "img/IMG_2583.PNG" }
         ]
     },
     {
-        cat: { zh: "Z.飲料", en: "Z.Drinks", km: "Z.ភេសជ្ជៈ", vi: "Z.Đồ uống" },
+        cat: { zh: "Z.饮料", en: "Z.Drinks", km: "Z.ភេសជ្ជៈ", vi: "Z.Đồ uống" },
         items: [
-            { id: 13, name: { zh: "Z1.越南煉乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá" }, price: 1, img: "img/MILKCOFEE.png" },
-            { id: 14, name: { zh: "Z2.東方樹葉烏龍茶", en: "Z2.Oolong Tea", km: "Z2.តែអ៊ូឡុង", vi: "Z2.Trà Ô Long" }, price: 1.5, img: "img/OLTEA.png" },
-            { id: 15, name: { zh: "Z3.東方樹葉綠茶", en: "Z3.Green Tea", km: "Z3.តែបៃតង", vi: "Trà xanh" }, price: 1.5, img: "img/GTEA.png" },
-            { id: 16, name: { zh: "Z4.東方樹葉茉莉花茶", en: "Z4.Jasmine Tea", km: "តែម្លិះ", vi: "Trà lài" }, price: 1.5, img: "img/JTEA.png" },
+            { id: 13, name: { zh: "Z1.越南炼乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá" }, price: 1, img: "img/MILKCOFEE.png" },
+            { id: 14, name: { zh: "Z2.东方树叶乌龙茶", en: "Z2.Oolong Tea", km: "Z2.តែអ៊ូឡុង", vi: "Z2.Trà Ô Long" }, price: 1.5, img: "img/OLTEA.png" },
+            { id: 15, name: { zh: "Z3.东方树叶绿茶", en: "Z3.Green Tea", km: "Z3.តែបៃតង", vi: "Trà xanh" }, price: 1.5, img: "img/GTEA.png" },
+            { id: 16, name: { zh: "Z4.东方树叶茉莉花茶", en: "Z4.Jasmine Tea", km: "តែម្លិះ", vi: "Trà lài" }, price: 1.5, img: "img/JTEA.png" },
             { id: 17, name: { zh: "Z5.TEAPLUS", en: "Z5.TEAPLUS", km: "Z5.TEAPLUS", vi: "Z5.TEAPLUS" }, price: 1.5, img: "img/TEAPLUS.png" },
-            { id: 18, name: { zh: "Z6.零度C檸檬綠茶", en: "Z6.Zero Degrees Lemon Flavored Green Tea", km: "Z6.Zero Degrees Lemon Flavored Green Tea", vi: "Z6.Trà Xanh Không Độ (Không Đường)" }, price: 1.5, img: "img/ZEROTEA.png" },
-            { id: 20, name: { zh: "Z7.可樂", en: "Z7.Coke", km: "Z7.កូកាឡា", vi: "Z7.Coca Cola" }, price: 1, img: "img/COKE.png" },
-            { id: 21, name: { zh: "Z8.卡拉寶", en: "Z8.Carabao", km: "Z8.Carabao", vi: "Z8.Carabao" }, price: 1, img: "img/CARABAO.png" },
+            { id: 18, name: { zh: "Z6.零度C柠檬绿茶", en: "Z6.Zero Degrees Lemon Flavored Green Tea", km: "Z6.Zero Degrees Lemon Flavored Green Tea", vi: "Z6.Trà Xanh Không Độ (Không Đường)" }, price: 1.5, img: "img/ZEROTEA.png" },
+            { id: 20, name: { zh: "Z7.可乐", en: "Z7.Coke", km: "Z7.កូកាឡា", vi: "Z7.Coca Cola" }, price: 1, img: "img/COKE.png" },
+            { id: 21, name: { zh: "Z8.卡拉宝", en: "Z8.Carabao", km: "Z8.Carabao", vi: "Z8.Carabao" }, price: 1, img: "img/CARABAO.png" },
             { id: 27, name: { zh: "Z9.Sting", en: "Z9.Sting", km: "Z9.Sting", vi: "Z9.Sting" }, price: 1, img: "img/STING.png" },
             { id: 19, name: { zh: "Z10.越南黑咖啡", en: "Z10.VN Black Coffee", km: "Z10.កាហ្វេខ្មៅ", vi: "Z10.Cà phê đen" }, price: 1, img: "img/BLOCKCOFFEE.png" },
-            { id: 28, name: { zh: "Z11.瓶裝水", en: "Z11.Water", km: "Z11ទឹកបរិសុទ្ធ", vi: "Z11Nước suối" }, price: 0.5, img: "img/HITECH.png" }
+            { id: 28, name: { zh: "Z11.瓶装水", en: "Z11.Water", km: "Z11ទឹកបរិសុទ្ធ", vi: "Z11Nước suối" }, price: 0.5, img: "img/HITECH.png" }
         ]
     }
 ];
@@ -325,7 +335,6 @@ function updateSummary() {
     let totalQty = 0;
     let totalPrice = 0;
     
-    // 計算總計時過濾重複 ID，確保價格顯示準確
     const processedCheck = new Set();
     menuData.forEach(cat => {
         cat.items.forEach(item => {
@@ -338,7 +347,7 @@ function updateSummary() {
     });
 
     const labels = { zh: "合计", en: "Total", km: "សរុប", vi: "Tổng" };
-    document.getElementById('cart-count').innerText = `${labels[currentLang]}: ${totalQty}`;
+    document.getElementById('cart-count').innerText = `${labels[currentLang]}: ${totalQty} 份`;
     document.getElementById('cart-total').innerText = `$${totalPrice.toFixed(2)}`;
     
     const btn = document.getElementById('btn-order');
@@ -363,8 +372,8 @@ function updateSummary() {
         btn.disabled = true;
         closedInfo.style.color = "#ff5722";
     } else {
-        const btnTexts = { zh: "點好了，發送訂單", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng ngay" };
-        btn.innerText = isSubmitting ? "Sending..." : btnTexts[currentLang];
+        const btnTexts = { zh: "点好了，发送订单", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng ngay" };
+        btn.innerText = isSubmitting ? "正在发送..." : btnTexts[currentLang];
         btn.disabled = totalQty === 0 || isSubmitting;
         closedInfo.style.color = "#777";
     }
@@ -426,7 +435,6 @@ async function sendToTelegram() {
 
         let message = `📍 *${displayTable}*\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 *New Order!*\n--------------------------\n`;
         
-        // --- 核心修正：使用 Set 過濾重複 ID 傳送 ---
         let subTotal = 0;
         const processedIds = new Set(); 
 
@@ -468,7 +476,7 @@ async function sendToTelegram() {
             let feeText = (tableNo === 'room') ? 
                 (currentLang === 'zh' ? ` (含${DELIVERY_FEE}$运费)` : ` (Incl. $${DELIVERY_FEE.toFixed(2)} fee)`) : "";
             
-            alert(`${i18nMsgs.success[currentLang]}\nTotal: $${finalTotal.toFixed(2)}${feeText}`);
+            alert(`${i18nMsgs.success[currentLang]}\n总计: $${finalTotal.toFixed(2)}${feeText}`);
             cart = {}; 
             window.location.href = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&status=done&lang=" + currentLang;
         } else {
@@ -479,7 +487,7 @@ async function sendToTelegram() {
         isSubmitting = false; 
         updateSummary();
         const errorHint = currentLang === 'zh' ? 
-            "⚠️ 传送超时或失败。\n請点击右上角「...」选择『在浏览器開啟』再下单！" : 
+            "⚠️ 传送超时或失败。\n请点击右上角「...」选择『在浏览器开启』再下单！" : 
             "⚠️ Send failed or timeout.\nPlease click '...' and select 'Open in Browser' to order.";
         alert(errorHint);
     }
