@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Khmer Menu & Order</title>
+    <title>Pho Linlin</title>
     <style>
         /* 基础重置：PC端背景设为灰色 */
         html, body {
@@ -133,6 +133,9 @@ const CHAT_ID = '-5238447566';
 const OPEN_HOUR = 7; 
 const CLOSE_HOUR = 24; 
 
+// 🚨 临时店休开关：true 为休息（禁止点餐），false 为营业
+const IS_CLOSED_TODAY = true; 
+
 // --- 公寓配送配置 ---
 const ROOM_DELIVERY_START = 10; 
 const ROOM_DELIVERY_END = 18;   
@@ -151,6 +154,13 @@ let isSubmitting = false;
 const fmtT = (h) => `${h.toString().padStart(2, '0')}:00`;
 
 const i18nMsgs = {
+    // 新增临时店休提示语
+    emergencyClosed: { 
+        zh: "📢 抱歉！今日店休，暂停接单 📢", 
+        en: "📢 Sorry! We are closed today 📢", 
+        km: "📢 សូមទោស! ថ្ងៃនេះហាងសម្រាក 📢", 
+        vi: "📢 Xin lỗi! Hôm nay quán nghỉ 📢" 
+    },
     success: { zh: "✅ 订单已发送！", en: "✅ Order Sent!", km: "✅ បានបញ្ជូនការបញ្ជាទិញ!", vi: "✅ Gửi đơn hàng thành công!" },
     closed: { zh: "抱歉，我们已经打烊了！", en: "Sorry, we are closed!", km: "សូមទោស យើងត្រូវបានបិទ!", vi: "Xin lỗi, chúng tôi đã đóng cửa!" },
     error: { zh: "⚠️ 发送失败，请稍后重试。", en: "⚠️ Failed to send, please try again.", km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត。", vi: "⚠️ Gửi thất bại, vui lòng thử lại sau." },
@@ -283,6 +293,7 @@ const menuData = [
 ];
 
 function isOpening() {
+    if (IS_CLOSED_TODAY) return false; // 🚨 核心逻辑：店休开关优先
     const now = new Date();
     const hour = now.getHours();
     return hour >= OPEN_HOUR && hour < CLOSE_HOUR;
@@ -321,6 +332,11 @@ function render() {
 }
 
 function updateCart(itemId, delta) {
+    // 🚨 即使没点下单，在加菜时也提醒店休
+    if (IS_CLOSED_TODAY) {
+        alert(i18nMsgs.emergencyClosed[currentLang]);
+        return;
+    }
     const currentCount = cart[itemId] || 0;
     if (delta > 0 && currentCount >= 5) {
         alert(currentLang === 'zh' ? "每款限购5份" : "Limit 5 per item");
@@ -356,27 +372,26 @@ function updateSummary() {
     const formatH = (h) => h.toString().padStart(2, '0');
     const timeRange = `${formatH(OPEN_HOUR)}:00 - ${formatH(CLOSE_HOUR)}:00`;
 
-    const openingLabels = {
-        zh: `营业时间: ${timeRange}`,
-        en: `Business Hours: ${timeRange}`,
-        km: `ម៉ោងលក់ដូរ: ${timeRange}`,
-        vi: `Giờ mở cửa: ${timeRange}`
-    };
-
-    closedInfo.innerText = openingLabels[currentLang];
-    closedInfo.style.display = 'block';
-
-    if (!isOpening()) {
+    // 🚨 根据店休开关显示底部提示文字
+    if (IS_CLOSED_TODAY) {
+        btn.innerText = currentLang === 'zh' ? "今日店休" : "Closed Today";
+        btn.disabled = true;
+        closedInfo.innerText = i18nMsgs.emergencyClosed[currentLang];
+        closedInfo.style.color = "#ff5722";
+    } else if (!isOpening()) {
         const closedBtnTexts = { zh: "休息中 (Closed)", en: "Closed Now", km: "បិទឥឡូវនេះ", vi: "Hiện đang đóng cửa" };
         btn.innerText = closedBtnTexts[currentLang];
         btn.disabled = true;
+        closedInfo.innerText = "营业时间: " + timeRange;
         closedInfo.style.color = "#ff5722";
     } else {
         const btnTexts = { zh: "点好了，发送订单", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng ngay" };
         btn.innerText = isSubmitting ? "正在发送..." : btnTexts[currentLang];
         btn.disabled = totalQty === 0 || isSubmitting;
+        closedInfo.innerText = "营业时间: " + timeRange;
         closedInfo.style.color = "#777";
     }
+    closedInfo.style.display = 'block';
 }
 
 async function sendToTelegram() {
@@ -386,8 +401,8 @@ async function sendToTelegram() {
         return;
     }
 
-    if (!isOpening()) {
-        alert(i18nMsgs.closed[currentLang] || i18nMsgs.closed.en);
+    if (IS_CLOSED_TODAY || !isOpening()) {
+        alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.closed[currentLang]);
         return;
     }
 
