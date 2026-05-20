@@ -134,7 +134,7 @@ const OPEN_HOUR = 7;
 const CLOSE_HOUR = 24; 
 
 // 🚨 临时店休开关：true 为休息（禁止点餐），false 为营业
-const IS_CLOSED_TODAY = false; 
+const IS_CLOSED_TODAY = true; 
 
 // --- 公寓配送配置 ---
 const ROOM_DELIVERY_START = 10; 
@@ -156,7 +156,7 @@ const fmtT = (h) => `${h.toString().padStart(2, '0')}:00`;
 const i18nMsgs = {
     // 新增临时店休提示语
     emergencyClosed: { 
-        zh: "📢 抱歉！今日店休，暂停接单 📢", 
+        zh: "📢 WOWNOW搜 PHO Linlin 📢", 
         en: "📢 Sorry! We are closed today 📢", 
         km: "📢 សូមទោស! ថ្ងៃនេះហាងសម្រាក 📢", 
         vi: "📢 Xin lỗi! Hôm nay quán nghỉ 📢" 
@@ -374,7 +374,7 @@ function updateSummary() {
 
     // 🚨 根据店休开关显示底部提示文字
     if (IS_CLOSED_TODAY) {
-        btn.innerText = currentLang === 'zh' ? "今日店休" : "Closed Today";
+        btn.innerText = currentLang === 'zh' ? "老闆休假無法外送" : "Closed Today";
         btn.disabled = true;
         closedInfo.innerText = i18nMsgs.emergencyClosed[currentLang];
         closedInfo.style.color = "#ff5722";
