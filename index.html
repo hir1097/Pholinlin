@@ -208,7 +208,7 @@ const i18nMsgs = {
         ko: `🏢 아파트 배달 시간은 ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)} 입니다. 현재 주문이 불가능합니다.`
     },
     minAmountErr: {
-        zh: `🏢 公寓配送订单最低消费需满 $${MIN_ROOM_AMOUNT.toFixed(2)} (不含运费)。`,
+        zh: `🏢 公寓配送订单最低消费须满 $${MIN_ROOM_AMOUNT.toFixed(2)} (不含运费)。`,
         en: `🏢 Minimum order for delivery is $${MIN_ROOM_AMOUNT.toFixed(2)} (excl. fee).`,
         km: `🏢 ការបញ្ជាទិញខុនដូត្រូវមានយ៉ាងហោចណាស់ $${MIN_ROOM_AMOUNT.toFixed(2)}។`,
         vi: `🏢 Đơn hàng chung cư tối thiểu phải từ $${MIN_ROOM_AMOUNT.toFixed(2)} (chưa ship).`,
@@ -272,7 +272,7 @@ const menuData = [
         items: [
             { id: 501, name: { zh: "E1.经典牛肉粉", en: "E1.Classic Beef Rice Noodle", km: "E1.គុយទាវសាច់គោពិសេស", vi: "E1.Bún Bò Huế", ja: "E1.定番牛肉ライスヌードル", ko: "E1.클래식 소고기 쌀국수" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 502, name: { zh: "E2.经典牛肉面线", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò", ja: "E2.定番牛肉細米粉麺", ko: "E2.클래식 소고기 버미셀리" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 503, name: { zh: "E3.经典牛肉汤泡面", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ุนបូហ្វេ", vi: "E3.Mì Bún Bò Huế", ja: "E3.定番牛肉インスタント麺", ko: "E3.클래식 소고기 라면" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 503, name: { zh: "E3.经典牛肉汤泡面", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế", ja: "E3.定番牛肉インスタント麺", ko: "E3.클래식 소고기 라면" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 504, name: { zh: "E4.经典牛肉汤泡饭", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt", ja: "E4.定番牛肉スープライス", ko: "E4.클래식 소고기 국밥" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 505, name: { zh: "E5.经典牛肉汤河粉", en: "E5.Classic Beef Soup with Flat Rice Noodles", km: "E5.គុយទាវសាច់គោពិសេសសរសៃធំ", vi: "E5.Bún bò Huế bánh phở", ja: "E5.定番牛肉スープのきしめん風ライスヌードル", ko: "E5.클래식 소고기 쌀국수(넓은면)" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 506, name: { zh: "E6.经典牛肉汤粉丝", en: "E6.គុយទាវសាច់គោពិសេសសរសៃកញ្ចក់", vi: "E6.Bún bò Huế miến", ja: "E6.定番牛肉スープの春雨麺", ko: "E6.클래식 소고기 당면 국수" }, price: 3.5, img: "img/IMG_2256.PNG" },
@@ -312,14 +312,16 @@ const menuData = [
             { id: 902, name: { zh: "Y2.煎蛋(全熟)", en: "Y2.Fried Egg (Well Done)", km: "Y2.ពងទាចៀន (ឆ្អិន)", vi: "Y2.Trứng chiên (Chín kỹ)", ja: "Y2.目玉焼き(良く焼き)", ko: "Y2.계란후라이(완숙)" }, price: 0.6, img: "img/EGG.PNG" },
             { id: 903, name: { zh: "Y4.煎蛋(不熟)", en: "Y4.Fried Egg (Over Easy)", km: "Y4.ពងទាចៀន (ជ័រភ្នៅ)", vi: "Y4.Trứng chiên (Lòng đào)", ja: "Y4.目玉焼き(半熟)", ko: "Y4.계란후라이(반숙)" }, price: 0.6, img: "img/EGG.PNG" },
             { id: 904, name: { zh: "Y5.葱蛋", en: "Y5.Scallion Omelet", km: "Y5.ពងទាចៀនស្លឹកខ្ទឹម", vi: "Y5.Trứng chiên hành", ja: "Y5.ネギ入り卵焼き", ko: "Y5.파계란말이" }, price: 0.6, img: "img/segg.png" },
-            { id: 905, name: { zh: "Y3.越南短法棍(2个)", en: "Y3.Short Baguette (2 pcs)", km: "Y3.នំបុ័ង (2)", vi: "Y3.Bánh mì ngắn (2 cái)", ja: "Y3.ミニバゲット(2個)", ko: "Y3.미니 바게트(2개)" }, price: 0.5, img: "img/IMG_2583.PNG" }
+            { id: 905, name: { zh: "Y3.越南短法棍(2个)", en: "Y3.Short Baguette (2 pcs)", km: "Y3.នំបុ័ង (2)", vi: "Y3.Bánh mì ngắn (2 cái)", ja: "Y3.ミニバゲット(2個)", ko: "Y3.미니 바ゲト(2개)" }, price: 0.5, img: "img/IMG_2583.PNG" }
         ]
     },
     {
         cat: { zh: "Z.饮料", en: "Z.Drinks", km: "Z.ភេសជ្ជៈ", vi: "Z.Đồ uống", ja: "Z.ドリンク", ko: "Z.음료수" },
         items: [
-            { id: 1001, name: { zh: "Z1.越南炼乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá", ja: "Z1.ベトナムミルクコーヒー", ko: "Z1.ベトナム 연유커피" }, price: 1, img: "img/MILKCOFEE.png" },
+            { id: 1001, name: { zh: "Z1.越南炼乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá", ja: "Z1.ベトナムミルクコーヒー", ko: "Z1.베트남 연유커피" }, price: 1, img: "img/MILKCOFEE.png" },
+            { id: 1008, name: { zh: "Z1.5.越南炼乳咖啡(小)", en: "Z1.5.VN Coffee w/ Milk (Small)", km: "Z1.5.កាហ្វេទឹកដោះគោ (តូច)", vi: "Z1.5.Cà phê sữa đá (Nhỏ)", ja: "Z1.5.ベトナムミルクコーヒー(小)", ko: "Z1.5.베트남 연유커피(소)" }, price: 0.75, img: "img/MILKCOFEE.png" },
             { id: 1002, name: { zh: "Z2.越南黑咖啡", en: "Z2.VN Black Coffee", km: "Z2.កាហ្វេខ្មៅ", vi: "Z2.Cà phê đen", ja: "Z2.ベトナムブラックコーヒー", ko: "Z2.베트남 블랙커피" }, price: 1, img: "img/BLOCKCOFFEE.png" },
+            { id: 1009, name: { zh: "Z2.5.越南黑咖啡(小)", en: "Z2.5.VN Black Coffee (Small)", km: "Z2.5.កាហ្វេខ្មៅ (តូច)", vi: "Z2.5.Cà phê đen (Nhỏ)", ja: "Z2.5.ベトナムブラックコーヒー(小)", ko: "Z2.5.베트남 블랙커피(소)" }, price: 0.5, img: "img/BLOCKCOFFEE.png" },
             { id: 1003, name: { zh: "Z3.柠檬茶", en: "Z3.Lemon Tea", km: "Z3.តែក្រូចឆ្មា", vi: "Z3.Trà chanh", ja: "Z3.レモンティー", ko: "Z3.레몬티" }, price: 1, img: "img/LEMON_TEA.png" },
             { id: 1004, name: { zh: "Z4.可乐", en: "Z4.Coke", km: "Z4.កូកាឡា", vi: "Z4.Coca Cola", ja: "Z4.コーラ", ko: "Z4.콜라" }, price: 1, img: "img/COKE.png" },
             { id: 1005, name: { zh: "Z5.卡拉宝", en: "Z5.Carabao", km: "Z5.Carabao", vi: "Z5.Carabao", ja: "Z5.カラバオ", ko: "Z5.카라바오" }, price: 1, img: "img/CARABAO.png" },
