@@ -133,7 +133,7 @@
 const TELEGRAM_TOKEN = '8765969177:AAGJmmNv8FxevpwzD61y5FHyzOule7545zk'; 
 const CHAT_ID = '-5238447566';
 const OPEN_HOUR = 7; 
-const CLOSE_HOUR = 21; 
+const CLOSE_HOUR = 19; 
 
 // 🚨 临时店休开关：true 为休息（禁止点餐），false 为营业
 const IS_CLOSED_TODAY = false; 
@@ -302,7 +302,7 @@ const menuData = [
             { id: 801, name: { zh: "X1.鸡腿饭+煎蛋", en: "X1.Chicken Leg Rice + Egg", km: "X1.បាយមាន់+ពងទា", vi: "X1.Cơm đùi gà + Trứng", ja: "X1.チキンレッグライス＆目玉焼き", ko: "X1.닭다리 덮밥 + 계란후라이" }, price: 3.5, img: "img/IMG_2259.PNG" },
             { id: 802, name: { zh: "X2.双枪鸡腿饭+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng", ja: "X2.ダブルチキンレッグライス＆目玉焼き", ko: "X2.더블 닭다리 덮밥 + 계란후라이" }, price: 5.5, img: "img/IMG_2259.PNG" },
             { id: 803, name: { zh: "X3.洋葱炒牛肉盖饭+煎蛋", en: "X3.Stir-fried Beef w/ Onion Rice + Egg", km: "X3.បាយឆាសាច់គោខ្ទឹមបារាំង+ពងទា", vi: "X3.Cơm bò xào hành tây + Trứng", ja: "X3.牛肉と玉ねぎ炒め丼＆目玉焼き", ko: "X3.양파 소고기 덮밥 + 계란후라이" }, price: 3.5, img: "img/X3.PNG" },
-            { id: 804, name: { zh: "X4.青椒炒牛肉盖饭+煎蛋", en: "X4.Stir-fried Beef w/ Green Pepper Rice + Egg", km: "X4.បាយឆាសាច់គោម្ទេសផ្លោក+ពងទា", vi: "X4.Cơm bò xào ớt chuông + Trứng", ja: "X4.牛肉とピーマン炒め丼＆目玉焼き", ko: "X4.피망 소고기 덮밥 + 계란후라이" }, price: 4.0, img: "img/X4.png" },
+            { id: 804, name: { zh: "X4.青椒炒牛肉盖饭+煎蛋", en: "X4.Stir-fried Beef w/ Green Pepper Rice + Egg", km: "X4.បាយឆាសាច់គោម្ទេសផ្លោក+ពងទា", vi: "X4.Cơm bò xào ớt chuông + Trứng", ja: "X4.牛肉とピーマン炒め丼＆目玉焼き", ko: "X4.피망 소고기 덮밥 + 계란후라이" }, price: 4.0, img: "img/X4.PNG" },
             EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
@@ -459,7 +459,6 @@ async function sendToTelegram() {
         return;
     }
 
-    // 🚨 终极防线：如果点击下单时检测到外送关闭且是 room 订户，强行拦截
     if (tableNo === 'room' && !IS_DELIVERY_ENABLED) {
         alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh);
         return;
@@ -507,7 +506,8 @@ async function sendToTelegram() {
         let displayTable = (tableNo === 'room') ? `🏢 房间 / Phòng: ${roomInfo}` : 
                            (tableNo === 'out') ? "🥡 打包 / Mang về" : `🪑 桌号 / Bàn: ${tableNo}`;
 
-        let message = `📍 *${displayTable}*\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 *New Order!*\n--------------------------\n`;
+        // 使用純文字格式，避免 Markdown 解析出錯
+        let message = `📍 ${displayTable}\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 New Order!\n--------------------------\n`;
         
         let subTotal = 0;
         let foodQty = 0;
@@ -520,10 +520,9 @@ async function sendToTelegram() {
                     processedIds.add(item.id);
                     const qty = cart[item.id];
                     const itemTotal = qty * item.price;
-                    message += `▪️ ${item.name.vi} (${item.name.zh})\n   SL: *${qty}*\n\n`;
+                    message += `▪️ ${item.name.vi} (${item.name.zh})\n   SL: ${qty}\n\n`;
                     subTotal += itemTotal;
 
-                    // 统计餐点与饮料数量 (ID 1000 以上为饮料品项，包括加购饮料)
                     if (item.id >= 1000) {
                         drinkQty += qty;
                     } else {
@@ -534,24 +533,23 @@ async function sendToTelegram() {
         });
 
         let finalTotal = subTotal;
-        message += `--------------------------\n🍲 *餐点 / Món ăn:* *${foodQty}*\n🥤 *饮料 / Đồ uống:* *${drinkQty}*\n`;
+        message += `--------------------------\n🍲 餐点 / Món ăn: ${foodQty}\n🥤 饮料 / Đồ uống: ${drinkQty}\n`;
 
         if (tableNo === 'room') {
             finalTotal += DELIVERY_FEE;
-            message += `🚚 *Delivery Fee / Phí ship: $${DELIVERY_FEE.toFixed(2)}*\n`;
+            message += `🚚 Delivery Fee / Phí ship: $${DELIVERY_FEE.toFixed(2)}\n`;
         }
-        message += `💰 *Total: $${finalTotal.toFixed(2)}*`;
+        message += `💰 Total: $${finalTotal.toFixed(2)}`;
 
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
         
+        // 修正 Request 配置，提升瀏覽器跨域相容性
         const response = await fetch(url, {
             method: 'POST',
-            mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
+                text: message
             }),
             signal: controller.signal
         });
