@@ -133,7 +133,7 @@
 const TELEGRAM_TOKEN = '8765969177:AAGJmmNv8FxevpwzD61y5FHyzOule7545zk'; 
 const CHAT_ID = '-5238447566';
 const OPEN_HOUR = 7; 
-const CLOSE_HOUR = 19; 
+const CLOSE_HOUR = 23; 
 
 // 🚨 临时店休开关：true 为休息（禁止点餐），false 为营业
 const IS_CLOSED_TODAY = false; 
@@ -189,7 +189,7 @@ const i18nMsgs = {
     },
     invalidTable: { 
         zh: "⚠️ 无效桌号，请扫描正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ。", vi: "⚠️ Số bàn không hợp lệ.",
-        ja: "⚠️ 無効なテーブル番号です。正しいQRコードをスキャンしてください。", ko: "⚠️ 유효하지 않은 테이블 번호입니다. 올바른 QR코드를 스キャン해주세요."
+        ja: "⚠️ 無効なテーブル番号です。正しいQRコードをスキャンしてください。", ko: "⚠️ 유효하지 않은 테이블 번호입니다. 올바른 QR코드를 스캔해주세요."
     },
     inputRoom: { 
         zh: `请输入您的房号：(须收取${DELIVERY_FEE}$运费)`, 
@@ -222,9 +222,9 @@ const EXTRA_CHICKEN = { id: 901, name: { zh: "加购炸鸡腿", en: "Add Chicken
 const EXTRA_EGG = { id: 902, name: { zh: "加购煎蛋(全熟)", en: "Add Fried Egg (Well Done)", km: "បន្ថែមពងទាចៀន (ឆ្អិន)", vi: "Thêm trứng chiên (Chín kỹ)", ja: "目玉焼き(良く焼き)追加", ko: "계란후라이(완숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
 const EXTRA_EGG_SOFT = { id: 903, name: { zh: "加购煎蛋(不熟)", en: "Add Fried Egg (Over Easy)", km: "បន្ថែមពងទាចៀន (ជ័រភ្នៅ)", vi: "Thêm trứng chiên (Lòng đào)", ja: "目玉焼き(半熟)追加", ko: "계란후라이(반숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
 const EXTRA_EGG_GREEN = { id: 904, name: { zh: "加购葱蛋", en: "Add Scallion Omelet", km: "បន្ថែមពងទាចៀនស្លឹកខ្ទឹម", vi: "Thêm trứng chiên hành", ja: "ネギ入り卵焼き追加", ko: "파계란말이 추가" }, price: 0.6, img: "img/segg.png" };
-const EXTRA_BAGUETTE = { id: 905, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미니 바ゲト(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
+const EXTRA_BAGUETTE = { id: 905, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미ニ 바ゲト(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
 const EXTRA_COFFEE = { id: 1001, name: { zh: "加购越南炼乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá", ja: "ベトナムミルクコーヒー追加", ko: "베트남 연유커피 추가" }, price: 1, img: "img/MILKCOFEE.png" };
-const EXTRA_LEMON_TEA = { id: 1003, name: { zh: "加购柠檬茶", en: "Add Lemon Tea", km: "បន្ថែមតែក្រូចឆ្មា", vi: "Thêm trà chanh", ja: "レモンティー追加", ko: "레먼티 추가" }, price: 1, img: "img/LEMON_TEA.png" };
+const EXTRA_LEMON_TEA = { id: 1003, name: { zh: "加购柠檬茶", en: "Add Lemon Tea", km: "បន្ថែមតែក្រូចឆ្មា", vi: "Thêm trà chanh", ja: "レモンティー追加", ko: "레មាន់តែ" }, price: 1, img: "img/LEMON_TEA.png" };
 
 const menuData = [
     {
@@ -292,7 +292,7 @@ const menuData = [
         cat: { zh: "G.法棍系列", en: "G.Baguette", km: "G.ប្រភេទនំបុ័ង", vi: "G.Bánh mì", ja: "G.バゲットシリーズ", ko: "G.바ゲト 시리즈" },
         items: [
             { id: 701, name: { zh: "G1.柬式红咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri", ja: "G1.レッドカレー＆バゲットセット", ko: "G1.레드카레 바ゲト 세트" }, price: 3.5, img: "img/IMG_2264.PNG" },
-            { id: 702, name: { zh: "G2.柬式米粉汤法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer", ja: "G2.クメール伝統スープ＆バゲット", ko: "G2.크메르 전통스프 바ゲト" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            { id: 702, name: { zh: "G2.柬式米粉汤法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer", ja: "G2.クメール伝統スープ＆バゲット", ko: "G2.크메르 전통សព៌ 바ゲト" }, price: 2.5, img: "img/IMG_2257set.PNG" },
             EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
@@ -448,7 +448,7 @@ function updateSummary() {
 }
 
 async function sendToTelegram() {
-    const validTables = ["1", "2", "3", "4", "5", "out", "room"];
+    const validTables = ["1", "2", "3", "4", "5", "out", "room", "app"];
     if (!validTables.includes(tableNo)) {
         alert(i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.en);
         return;
@@ -499,14 +499,28 @@ async function sendToTelegram() {
             if (!roomInfo) return; 
         }
 
+        let selectedPlatform = "";
+        if (tableNo === 'app') {
+            const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n(请输入数字 1-4 / Enter 1-4)");
+            if (!platformInput) return; // 用户取消输入
+            
+            const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda" };
+            selectedPlatform = pMap[platformInput.trim()];
+            if (!selectedPlatform) {
+                alert("⚠️ 无效选择 / Invalid selection");
+                return;
+            }
+        }
+
         if (isSubmitting) return;
         isSubmitting = true;
         updateSummary();
 
         let displayTable = (tableNo === 'room') ? `🏢 房间 / Phòng: ${roomInfo}` : 
+                           (tableNo === 'app') ? `🛵 外卖平台 / App: ${selectedPlatform}` :
                            (tableNo === 'out') ? "🥡 打包 / Mang về" : `🪑 桌号 / Bàn: ${tableNo}`;
 
-        // 使用純文字格式，避免 Markdown 解析出錯
+        // 使用纯文本格式，避免 Markdown 解析出错
         let message = `📍 ${displayTable}\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 New Order!\n--------------------------\n`;
         
         let subTotal = 0;
@@ -543,7 +557,7 @@ async function sendToTelegram() {
 
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
         
-        // 修正 Request 配置，提升瀏覽器跨域相容性
+        // 修正 Request 配置，提升浏览器跨域兼容性
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
