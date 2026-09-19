@@ -185,7 +185,7 @@ const i18nMsgs = {
     },
     error: { 
         zh: "⚠️ 发送失败，请稍后重试。", en: "⚠️ Failed to send, please try again.", km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត。", vi: "⚠️ Gửi thất bại, vui lòng thử lại sau.",
-        ja: "⚠️ 送信に失敗しました。後ほどもう一度お試しください。", ko: "⚠️ 전송 실패, 잠시 후 다시 시도해주세요."
+        ja: "⚠️ 送信に失敗しました。後ほどもう一度お试しください。", ko: "⚠️ 전송 실패, 잠시 후 다시 시도해주세요."
     },
     invalidTable: { 
         zh: "⚠️ 无效桌号，请扫描正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ。", vi: "⚠️ Số bàn không hợp lệ.",
@@ -196,7 +196,7 @@ const i18nMsgs = {
         en: `Please enter your room number: ($${DELIVERY_FEE.toFixed(2)} fee applies)`, 
         km: `សូមបញ្ចូលលេខបន្ទប់របស់អ្នក: (ថ្លៃដឹកជញ្ជូន ${DELIVERY_FEE}$)`, 
         vi: `Vui lòng nhập số phòng của bạn: (Phí giao hàng là ${DELIVERY_FEE}$)` ,
-        ja: `部屋番号を入力してください：(配送料 $${DELIVERY_FEE.toFixed(2)})`,
+        ja: `部屋番号を入力してください：（配送料 $${DELIVERY_FEE.toFixed(2)}）`,
         ko: `방 번호를 입력해주세요: (배달료 $${DELIVERY_FEE.toFixed(2)})`
     },
     roomTimeErr: {
@@ -222,7 +222,7 @@ const EXTRA_CHICKEN = { id: 901, name: { zh: "加购炸鸡腿", en: "Add Chicken
 const EXTRA_EGG = { id: 902, name: { zh: "加购煎蛋(全熟)", en: "Add Fried Egg (Well Done)", km: "បន្ថែមពងទាចៀន (ឆ្អិន)", vi: "Thêm trứng chiên (Chín kỹ)", ja: "目玉焼き(良く焼き)追加", ko: "계란후라이(완숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
 const EXTRA_EGG_SOFT = { id: 903, name: { zh: "加购煎蛋(不熟)", en: "Add Fried Egg (Over Easy)", km: "បន្ថែមពងទាចៀន (ជ័រភ្នៅ)", vi: "Thêm trứng chiên (Lòng đào)", ja: "目玉焼き(半熟)追加", ko: "계란후라이(반숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
 const EXTRA_EGG_GREEN = { id: 904, name: { zh: "加购葱蛋", en: "Add Scallion Omelet", km: "បន្ថែមពងទាចៀនស្លឹកខ្ទឹម", vi: "Thêm trứng chiên hành", ja: "ネギ入り卵焼き追加", ko: "파계란말이 추가" }, price: 0.6, img: "img/segg.png" };
-const EXTRA_BAGUETTE = { id: 905, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미ニ 바ゲト(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
+const EXTRA_BAGUETTE = { id: 905, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미니 바ゲト(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
 const EXTRA_COFFEE = { id: 1001, name: { zh: "加购越南炼乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá", ja: "ベトナムミルクコーヒー追加", ko: "베트남 연유커피 추가" }, price: 1, img: "img/MILKCOFEE.png" };
 const EXTRA_LEMON_TEA = { id: 1003, name: { zh: "加购柠檬茶", en: "Add Lemon Tea", km: "បន្ថែមតែក្រូចឆ្មា", vi: "Thêm trà chanh", ja: "レモンティー追加", ko: "레មាន់តែ" }, price: 1, img: "img/LEMON_TEA.png" };
 
@@ -235,7 +235,7 @@ const menuData = [
             { id: 103, name: { zh: "A3.越南牛肉汤面线", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Bún bò", ja: "A3.牛肉スープの細米粉麺", ko: "A3.소고기 버미셀리 国수" }, price: 3, img: "img/IMG_2263.PNG" },
             { id: 104, name: { zh: "A4.越南牛肉汤泡面", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Mì bò", ja: "A4.牛肉スープのインスタント麺", ko: "A4.소고기 국물 라면" }, price: 3, img: "img/IMG_2263.PNG" },
             { id: 105, name: { zh: "A5.越南牛肉汤泡饭", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Cơm súp bò", ja: "A5.牛肉クッパ風ライス", ko: "A5.소고기 국밥" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 106, name: { zh: "A6.越南牛肉粉丝", en: "A6.Beef Soup with Glass Noodles", km: "A6.ហ្វឺមីសរសៃកញ្ចក់សាច់គោ", vi: "A6.Miến bò", ja: "A6.牛肉スープの春雨麺", ko: "A6.소고기 당면 국수" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 106, name: { zh: "A6.越南牛肉粉丝", en: "A6.Beef Soup with Glass Noodles", km: "A6.ហ្វឺមីសរសៃកញ្ចក់សាច់គោ", vi: "A6.Miến bò", ja: "A6.牛肉スープの春雨麺", ko: "A6.소고기 당면 국수" }, price: 3.5, img: "img/IMG_2263.PNG" },
             EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
@@ -259,11 +259,12 @@ const menuData = [
         ]
     },
     {
+        hidden: true, // 🚨 暂时下架隐藏，保留代码
         cat: { zh: "D.柬式米粉", en: "D.Nom Banh Chok", km: "D.នំបញ្ចុក", vi: "D.Bún Khmer", ja: "D.伝統クメール麺", ko: "D.놈반촉" },
         items: [
             { id: 401, name: { zh: "D1.柬式米粉", en: "D1.Traditional Khmer Noodle", km: "D1.នំបញ្ចុកសម្លរប្រហើរ", vi: "D1.Bún Khmer truyền thống", ja: "D1.伝統クメール魚スープ生麺", ko: "D1.크메르 전통 生쌀국수" }, price: 1.5, img: "img/IMG_2257.PNG" },
             { id: 402, name: { zh: "D2.柬式米粉汤泡饭", en: "D2.Nom Banh Chok Soup with Rice", km: "D2.បាយស៊ុបនំបញ្ចុក", vi: "D2.Cơm súp Khmer", ja: "D2.クメール伝統スープライス", ko: "D2.크메르 전통 국밥" }, price: 1.5, img: "img/IMG_2257.PNG" },
-            { id: 403, name: { zh: "D3.柬式米粉汤法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer", ja: "D3.クメール伝統スープ＆バゲット", ko: "D3.크메르 전통스프 바ゲト" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            { id: 403, name: { zh: "D3.柬式米粉汤法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer", ja: "D3.クメール伝統スープ＆バゲット", ko: "D3.크메르 전통សព៌ 바ゲト" }, price: 2.5, img: "img/IMG_2257set.PNG" },
             EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
@@ -275,7 +276,7 @@ const menuData = [
             { id: 503, name: { zh: "E3.经典牛肉汤泡面", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế", ja: "E3.定番牛肉インスタント麺", ko: "E3.클래식 소고기 라면" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 504, name: { zh: "E4.经典牛肉汤泡饭", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt", ja: "E4.定番牛肉スープライス", ko: "E4.클래식 소고기 국밥" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 505, name: { zh: "E5.经典牛肉汤河粉", en: "E5.Classic Beef Soup with Flat Rice Noodles", km: "E5.គុយទាវសាច់គោពិសេសសរសៃធំ", vi: "E5.Bún bò Huế bánh phở", ja: "E5.定番牛肉スープのきしめん風ライスヌードル", ko: "E5.클래식 소고기 쌀국수(넓은면)" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 506, name: { zh: "E6.经典牛肉汤粉丝", en: "E6.គុយទាវសាច់គោពិសេសសរសៃកញ្ចក់", vi: "E6.Bún bò Huế miến", ja: "E6.定番牛肉スープの春雨麺", ko: "E6.클래식 소고기 당면 국수" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 506, name: { zh: "E6.经典牛肉汤粉丝", en: "E6.គុយទាវសាច់គោពិសេសសរសៃកញ្ចក់", vi: "E6.Bún bò Huế miến", ja: "E6.定番牛肉スープの春雨麺", ko: "E6.클래식 소고기 당면 국수" }, price: 4.0, img: "img/IMG_2256.PNG" },
             EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
@@ -341,11 +342,21 @@ function isOpening() {
 
 function render() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.innerHTML = menuData.map((data, index) => `
-        <div class="tab ${index === currentCatIndex ? 'active' : ''}" onclick="switchCat(${index})">
-            ${data.cat[currentLang] || data.cat.zh}
-        </div>
-    `).join('');
+    
+    // 如果初始选中的分类被隐藏，自动切换到第一个未隐藏的分类
+    if (menuData[currentCatIndex] && menuData[currentCatIndex].hidden) {
+        const firstVisibleIndex = menuData.findIndex(d => !d.hidden);
+        currentCatIndex = firstVisibleIndex !== -1 ? firstVisibleIndex : 0;
+    }
+
+    sidebar.innerHTML = menuData.map((data, index) => {
+        if (data.hidden) return ''; // 隐藏下架分类的 SideBar Tab
+        return `
+            <div class="tab ${index === currentCatIndex ? 'active' : ''}" onclick="switchCat(${index})">
+                ${data.cat[currentLang] || data.cat.zh}
+            </div>
+        `;
+    }).join('');
 
     const catTitle = document.getElementById('cat-display');
     catTitle.innerText = menuData[currentCatIndex].cat[currentLang] || menuData[currentCatIndex].cat.zh;
@@ -501,10 +512,10 @@ async function sendToTelegram() {
 
         let selectedPlatform = "";
         if (tableNo === 'app') {
-            const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n(请输入数字 1-4 / Enter 1-4)");
+            const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n5: PassApp\n(请输入数字 1-5 / Enter 1-5)");
             if (!platformInput) return; // 用户取消输入
             
-            const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda" };
+            const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda", "5": "PassApp" };
             selectedPlatform = pMap[platformInput.trim()];
             if (!selectedPlatform) {
                 alert("⚠️ 无效选择 / Invalid selection");
