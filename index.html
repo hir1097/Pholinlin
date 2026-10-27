@@ -168,7 +168,7 @@ const i18nMsgs = {
         ko: "📢 WOWNOW에서 'PHO Linlin'을 검색하세요 📢"
     },
     deliveryDisabled: {
-        zh: "📢 今日老闆無法外送，WOWNOW或是GRAB搜 \"Pholinlin\" 📢",
+        zh: "📢 今日老闆無法外送，WOWNOW搜 \"Pholinlin\" 📢",
         en: "📢 No delivery today, please search \"Pholinlin\" on WOWNOW 📢",
         km: "📢 ថ្ងៃនេះមិនមានសេវាដឹកជញ្ជូនទេ សូមស្វែងរក \"Pholinlin\" លើ WOWNOW 📢",
         vi: "📢 Hôm nay không giao hàng, vui lòng tìm \"Pholinlin\" trên WOWNOW 📢",
@@ -275,7 +275,7 @@ const menuData = [
             { id: 502, name: { zh: "E2.经典牛肉面线", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò", ja: "E2.定番牛肉細米粉麺", ko: "E2.클래식 소고기 버미셀리" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 503, name: { zh: "E3.经典牛肉汤泡面", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế", ja: "E3.定番牛肉インスタント麺", ko: "E3.클래식 소고기 라면" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 504, name: { zh: "E4.经典牛肉汤泡饭", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt", ja: "E4.定番牛肉スープライス", ko: "E4.클래식 소고기 국밥" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 505, name: { zh: "E5.经典牛肉汤河粉", en: "E5.Classic Beef Soup with Flat Rice Noodles", km: "E5.គុយទាវសាច់គោពិសេសសរសៃធំ", vi: "E5.Bún bò Huế bánh phở", ja: "E5.定番牛肉スープのきしめん風ライスヌードル", ko: "E5.클래식 소고기 쌀국수(넓은면)" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 505, name: { zh: "E5.经典牛肉汤河粉", en: "E5.Classic Beef Soup with Flat Rice Noodles", km: "E5.គុយទាវសាច់គោពិសេសសរសៃធំ", vi: "E5.Bún bò Huế bánh phở", ja: "E5.定番牛肉スープのきしめん风ライスヌードル", ko: "E5.클래식 소고기 쌀국수(넓은면)" }, price: 3.5, img: "img/IMG_2256.PNG" },
             { id: 506, name: { zh: "E6.经典牛肉汤粉丝", en: "E6.គុយទាវសាច់គោពិសេសសរសៃកញ្ចក់", vi: "E6.Bún bò Huế miến", ja: "E6.定番牛肉スープの春雨麺", ko: "E6.클래식 소고기 당면 국수" }, price: 4.0, img: "img/IMG_2256.PNG" },
             EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
@@ -328,7 +328,7 @@ const menuData = [
             { id: 1004, name: { zh: "Z4.可乐", en: "Z4.Coke", km: "Z4.កូកាឡា", vi: "Z4.Coca Cola", ja: "Z4.コーラ", ko: "Z4.콜라" }, price: 1, img: "img/COKE.png" },
             { id: 1005, name: { zh: "Z5.卡拉宝", en: "Z5.Carabao", km: "Z5.Carabao", vi: "Z5.Carabao", ja: "Z5.カラバオ", ko: "Z5.카라바오" }, price: 1, img: "img/CARABAO.png" },
             { id: 1006, name: { zh: "Z6.Sting", en: "Z6.Sting", km: "Z6.Sting", vi: "Z6.Sting", ja: "Z6.スティング", ko: "Z6.스팅" }, price: 1, img: "img/STING.png" },
-            { id: 1007, name: { zh: "Z7.瓶装水", en: "Z7.Water", km: "Z7.ទឹកបរិសុទ្ធ", vi: "Z7.Nước suối", ja: "Z7.ミネラルウォーター", ko: "Z7.생수" }, price: 0.5, img: "img/HITECH.png" }
+            { id: 1007, name: { zh: "Z7.瓶装水", en: "Z7.Water", km: "Z7.ទឹកបរិសុទ្ធ", vi: "Z7.Nước suối", ja: "Z7.ミネラルウォーター", ko: "Z7.생수" }, price: 0.5, img: "img/HITECH.png" },
             { id: 1010, name: { zh: "Z8.酸梅汤", en: "Z8.Plum Juice", km: "Z8.ទឹកផ្លែជូរ", vi: "Z8.Nước xí muội", ja: "Z8.梅ジュース", ko: "Z8.매실차" }, price: 1, img: "img/PLUM.png" }
         ]
     }
@@ -513,10 +513,10 @@ async function sendToTelegram() {
 
         let selectedPlatform = "";
         if (tableNo === 'app') {
-            const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n5: PassApp\n(请输入数字 1-5 / Enter 1-5)");
+            const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n(请输入数字 1-4 / Enter 1-4)");
             if (!platformInput) return; // 用户取消输入
             
-            const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda", "5": "PassApp" };
+            const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda" };
             selectedPlatform = pMap[platformInput.trim()];
             if (!selectedPlatform) {
                 alert("⚠️ 无效选择 / Invalid selection");
