@@ -224,6 +224,7 @@ const EXTRA_EGG_SOFT = { id: 903, name: { zh: "加购煎蛋(不熟)", en: "Add F
 const EXTRA_EGG_GREEN = { id: 904, name: { zh: "加购葱蛋", en: "Add Scallion Omelet", km: "បន្ថែមពងទាចៀនស្លឹកខ្ទឹម", vi: "Thêm trứng chiên hành", ja: "ネギ入り卵焼き追加", ko: "파계란말이 추가" }, price: 0.6, img: "img/segg.png" };
 const EXTRA_BAGUETTE = { id: 905, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미니 바게토(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
 const EXTRA_BEEF = { id: 906, name: { zh: "加购牛肉", en: "Add Beef", km: "បន្ថែមសាច់គោ", vi: "Thêm thịt bò", ja: "牛肉追加", ko: "소고기 추가" }, price: 1.0, img: "" };
+const SWAP_EGG = { id: 908, name: { zh: "煎蛋换葱蛋(限饭类)", en: "Swap Fried Egg for Scallion Omelet", km: "ដូរពងទាចៀនទៅពងទាចៀនស្លឹកខ្ទឹម", vi: "Đổi trứng chiên thành trứng hành", ja: "目玉焼きをネギ入り卵焼きに変更", ko: "계란후라이를 파계란말이로 변경" }, price: 0, img: "img/segg.png" };
 const EXTRA_COFFEE = { id: 1001, name: { zh: "加购越南炼乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá", ja: "ベトナムミルクコーヒー追加", ko: "베트남 연유커피 추가" }, price: 1, img: "img/MILKCOFEE.png" };
 const EXTRA_LEMON_TEA = { id: 1003, name: { zh: "加购柠檬茶", en: "Add Lemon Tea", km: "បន្ថែមតែក្រូចឆ្មា", vi: "Thêm trà chanh", ja: "レモンティー追加", ko: "레몬티 추가" }, price: 1, img: "img/LEMON_TEA.png" };
 const EXTRA_PLUM = { id: 1010, name: { zh: "加购酸梅汤", en: "Add Plum Juice", km: "បន្ថែមទឹកផ្លែជូរ", vi: "Thêm nước xí muội", ja: "梅ジュース追加", ko: "매실차 추가" }, price: 1, img: "img/PLUM.png" };
@@ -234,20 +235,21 @@ const menuData = [
         items: [
             { id: 101, name: { zh: "A1.越南牛肉河粉", en: "A1.Beef PHO", km: "A1.ហ្វឺសាច់គោ", vi: "A1.Phở bò", ja: "A1.牛肉のフォー", ko: "A1.소고기 쌀국수" }, price: 3, img: "img/IMG_2263.PNG" },
             { id: 102, name: { zh: "A2.越南牛肉河粉(大份)", en: "A2.Beef PHO (Large)", km: "A2.ហ្វឺសាច់គោ (ធំ)", vi: "A2.Phở bò (Lớn)", ja: "A2.牛肉のフォー(大盛)", ko: "A2.소고기 쌀국수(곱배기)" }, price: 5, img: "img/IMG_2263.PNG" },
-            { id: 103, name: { zh: "A3.越南牛肉汤面线", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Bún bò nước lèo", ja: "A3.牛肉スープの細米粉麺", ko: "A3.소고기 버미셀리 국수" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 104, name: { zh: "A4.越南牛肉汤泡面", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Mì tôm bò", ja: "A4.牛肉スープのインスタント麺", ko: "A4.소고기 국물 라면" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 105, name: { zh: "A5.越南牛肉汤泡饭", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Cơm súp bò", ja: "A5.牛肉クッパ風ライス", ko: "A5.소고기 국밥" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 106, name: { zh: "A6.越南牛肉粉丝", en: "A6.Beef Soup with Glass Noodles", km: "A6.ហ្វឺមីសរសៃកញ្ចក់សាច់គោ", vi: "A6.Miến bò nước", ja: "A6.牛肉スープの春雨麺", ko: "A6.소고기 당면 국수" }, price: 3.5, img: "img/IMG_2263.PNG" },
+            { id: 103, name: { zh: "A3.越南牛肉汤面线", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Phở nước bún", ja: "A3.牛肉スープの細米粉麺", ko: "A3.소고기 버미셀리 국수" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 104, name: { zh: "A4.越南牛肉汤泡面", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Phở mì bò", ja: "A4.牛肉スープのインスタント麺", ko: "A4.소고기 국물 라면" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 105, name: { zh: "A5.越南牛肉汤泡饭", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Phở cơm bò", ja: "A5.牛肉クッパ風ライス", ko: "A5.소고기 국밥" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 106, name: { zh: "A6.越南牛肉粉丝", en: "A6.Beef Soup with Glass Noodles", km: "A6.ហ្វឺមីសរសៃកញ្ចក់សាច់គោ", vi: "A6.Phở miến bò", ja: "A6.牛肉スープの春雨麺", ko: "A6.소고기 당면 국수" }, price: 3.5, img: "img/IMG_2263.PNG" },
             EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
         cat: { zh: "B.高棉粿条", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer", ja: "B.クメールクィティオ", ko: "B.크메르 쿠이티오" },
         items: [
-            { id: 201, name: { zh: "B1.高棉粿条", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu", ja: "B1.クメール風ライスヌードル", ko: "B1.크메르 쌀국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 202, name: { zh: "B2.高棉粿条汤面线", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Bún súp Khmer", ja: "B2.クメールスープの細米粉麺", ko: "B2.크메르 버미셀리 국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 203, name: { zh: "B3.高棉粿条汤泡面", en: "B3.Khmer Instant Noodle Soup", km: "B3.មីគុយទាវ", vi: "B3.Mì hủ tiếu", ja: "B3.クメールスープのインスタント麺", ko: "B3.크메르 국물 라면" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 204, name: { zh: "B4.高棉粿条汤泡饭", en: "B4.Khmer Soup Rice", km: "B4.បាយស៊ុប", vi: "B4.Cơm súp Khmer", ja: "B4.クメール风スープライス", ko: "B4.크메르 국밥" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 201, name: { zh: "B1.高棉粿条", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu Khmer", ja: "B1.クメール風ライスヌードル", ko: "B1.크메르 쌀국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 202, name: { zh: "B2.高棉粿条汤面线", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Hủ tiếu Khmer nước bún", ja: "B2.クメールスープの細米粉麺", ko: "B2.크메르 버미셀리 국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 203, name: { zh: "B3.高棉粿条汤泡面", en: "B3.Khmer Instant Noodle Soup", km: "B3.មីគុយទាវ", vi: "B3.Hủ tiếu Khmer mì", ja: "B3.クメールスープのインスタント麺", ko: "B3.크메르 국물 라면" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 204, name: { zh: "B4.高棉粿条汤泡饭", en: "B4.Khmer Soup Rice", km: "B4.បាយស៊ុប", vi: "B4.Hủ tiếu Khmer cơm", ja: "B4.クメール風スープライス", ko: "B4.크메르 국밥" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 205, name: { zh: "B5.高棉粿条汤河粉", en: "B5.Khmer Soup Flat Noodles", km: "B5.គុយទាវសរសៃធំ", vi: "B5.Hủ tiếu Khmer bánh phở", ja: "B5.クメールスープのきしめん風ライスヌードル", ko: "B5.크메르 쌀국수(넓은면)" }, price: 2.5, img: "img/IMG_2258.PNG" },
             EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
@@ -284,14 +286,17 @@ const menuData = [
     },
     {
         cat: { zh: "F.越式蟹肉饼汤粉", en: "F.Crab Pork Cake Soup", km: "F.ស៊ុបខ្យងក្តាម", vi: "F.Bún riêu", ja: "F.カニ肉団子麺", ko: "F.게살 완탕 국수" },
-        items: [
-            { id: 601, name: { zh: "F1.越式蟹肉饼汤面", en: "F1.Crab Pork Cake with Instant Noodle", km: "F1.មីស៊ុបខ្យងក្តាម", vi: "F1.Mì riêu cua", ja: "F1.カニ肉団子スープのインスタント麺", ko: "F1.게살 완탕 라면" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 602, name: { zh: "F2.越式蟹肉饼汤粉", en: "F2.Crab Pork Cake with Rice Noodle", km: "F2.នំបញ្ចុកស៊ុបខ្យងក្តាម", vi: "F2.Bún riêu cua", ja: "F2.カニ肉団子スープのライスヌードル", ko: "F2.게살 완탕 쌀국수" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 603, name: { zh: "F3.越式蟹肉饼饭", en: "F3.Crab Pork Cake with Rice", km: "F3.បាយស៊ុបសខ្យងក្តាម", vi: "F3.Cơm riêu cua", ja: "F3.カニ肉団子スープライス", ko: "F3.게살 완탕 국밥" }, price: 2.5, img: "img/IMG_3001.PNG" },
+        items: [    
+            { id: 601, name: { zh: "F1.越式蟹肉饼汤面线", en: "F1.Crab Pork Cake with Vermicelli", km: "F1.នំបញ្ចុកស៊ុបខ្យងក្តាម", vi: "F1.Bún riêu cua", ja: "F1.カニ肉団子スープの細米粉麺", ko: "F1.게살 완탕 버미셀리" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 602, name: { zh: "F2.越式蟹肉饼汤泡面", en: "F2.Crab Pork Cake with Instant Noodle", km: "F2.មីស៊ុបខ្យងក្តាម", vi: "F2.Mì riêu cua", ja: "F2.カニ肉団子スープのインスタント麺", ko: "F2.게살 완탕 라면" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 603, name: { zh: "F3.越式蟹肉饼汤泡饭", en: "F3.Crab Pork Cake Soup Rice", km: "F3.បាយស៊ុបខ្យងក្តាម", vi: "F3.Cơm riêu cua", ja: "F3.カニ肉団子スープライス", ko: "F3.게살 완탕 국밥" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 604, name: { zh: "F4.越式蟹肉饼汤河粉", en: "F4.Crab Pork Cake Flat Noodles", km: "F4.គុយទាវសរសៃធំខ្យងក្តាម", vi: "F4.Bánh phở riêu cua", ja: "F4.カニ肉団子スープのきしめん風ライスヌードル", ko: "F4.게살 완탕 쌀국수(넓은면)" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 605, name: { zh: "F5.越式蟹肉饼汤粿条", en: "F5.Crab Pork Cake Khmer Noodles", km: "F5.គុយទាវស៊ុបខ្យងក្តាម", vi: "F5.Hủ tiếu riêu cua", ja: "F5.カニ肉団子スープのクメール風ヌードル", ko: "F5.게살 완탕 쌀국수" }, price: 2.5, img: "img/IMG_3001.PNG" },
             EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
+        hidden: true, // 🚨 暂时下架隐藏，保留代码
         cat: { zh: "G.法棍系列", en: "G.Baguette", km: "G.ប្រភេទនំបុ័ង", vi: "G.Bánh mì", ja: "G.バゲットシリーズ", ko: "G.바ゲト 시리즈" },
         items: [
             { id: 701, name: { zh: "G1.柬式红咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri", ja: "G1.レッドカレー＆バゲットセット", ko: "G1.레드카레 바ゲト 세트" }, price: 3.5, img: "img/IMG_2264.PNG" },
@@ -306,7 +311,7 @@ const menuData = [
             { id: 802, name: { zh: "X2.双枪鸡腿饭+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng", ja: "X2.ダブルチキンレッグライス＆目玉焼き", ko: "X2.더블 닭다리 덮밥 + 계란후라이" }, price: 5.5, img: "img/IMG_2259.PNG" },
             { id: 803, name: { zh: "X3.洋葱炒牛肉盖饭+煎蛋", en: "X3.Stir-fried Beef w/ Onion Rice + Egg", km: "X3.បាយឆាសាច់គោខ្ទឹមបារាំង+ពងទា", vi: "X3.Cơm bò xào hành tây + Trứng", ja: "X3.牛肉と玉ねぎ炒め丼＆目玉焼き", ko: "X3.양파 소고기 덮밥 + 계란후라이" }, price: 3.5, img: "img/X3.png" },
             { id: 804, name: { zh: "X4.青椒炒牛肉盖饭+煎蛋", en: "X4.Stir-fried Beef w/ Green Pepper Rice + Egg", km: "X4.បាយឆាសាច់គោម្ទេសផ្លោក+ពងទា", vi: "X4.Cơm bò xào ớt chuông + Trứng", ja: "X4.牛肉とピーマン炒め丼＆目玉焼き", ko: "X4.피망 소고기 덮밥 + 계란후라이" }, price: 4.0, img: "img/X4.png" },
-            EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
+            SWAP_EGG, EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
@@ -388,21 +393,28 @@ function render() {
 }
 
 function updateCart(itemId, delta) {
-    if (IS_CLOSED_TODAY) {
-        alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.emergencyClosed.zh);
-        return;
-    }
+    if (IS_CLOSED_TODAY) { alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.emergencyClosed.zh); return; }
     // 🚨 针对公寓用户在试图点菜或加菜时进行外送开关拦截
-    if (tableNo === 'room' && !IS_DELIVERY_ENABLED) {
-        alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh);
-        return;
-    }
+    if (tableNo === 'room' && !IS_DELIVERY_ENABLED) { alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh); return; }
+
     const currentCount = cart[itemId] || 0;
-    if (delta > 0 && currentCount >= 5) {
-        alert(currentLang === 'zh' ? "每款限购5份" : "Limit 5 per item");
-        return; 
+    if (delta > 0 && currentCount >= 5) { alert(currentLang === 'zh' ? "每款限购5份" : "Limit 5 per item"); return; }
+
+    // 🔒【煎蛋换葱蛋 数量限制】不能超过饭类(801~804)的总数量
+    if (itemId === 908 && delta > 0) {
+        const totalRice = (cart[801] || 0) + (cart[802] || 0) + (cart[803] || 0) + (cart[804] || 0);
+        if (currentCount >= totalRice) {
+            alert(currentLang === 'zh' ? `⚠️ 换葱蛋数量不能超过饭类总数！(当前已点 ${totalRice} 份饭)` : `⚠️ Swap count cannot exceed total rice dishes! (${totalRice} ordered)`);
+            return;
+        }
     }
+
     cart[itemId] = currentCount + delta;
+
+    // 🔒【回扣逻辑】若减少饭类导致换蛋数溢出，自动把换蛋数扣回
+    const newTotalRice = (cart[801] || 0) + (cart[802] || 0) + (cart[803] || 0) + (cart[804] || 0);
+    if ((cart[908] || 0) > newTotalRice) { cart[908] = newTotalRice; }
+
     if (cart[itemId] <= 0) delete cart[itemId];
     render();
 }
