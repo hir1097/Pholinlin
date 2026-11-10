@@ -477,20 +477,9 @@ function updateSummary() {
 
 async function sendToTelegram() {
     const validTables = ["1", "2", "3", "4", "5", "out", "room", "app"];
-    if (!validTables.includes(tableNo)) {
-        alert(i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.en);
-        return;
-    }
-
-    if (IS_CLOSED_TODAY || !isOpening()) {
-        alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.closed[currentLang]);
-        return;
-    }
-
-    if (tableNo === 'room' && !IS_DELIVERY_ENABLED) {
-        alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh);
-        return;
-    }
+    if (!validTables.includes(tableNo)) { alert(i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.en); return; }
+    if (IS_CLOSED_TODAY || !isOpening()) { alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.closed[currentLang]); return; }
+    if (tableNo === 'room' && !IS_DELIVERY_ENABLED) { alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh); return; }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); 
@@ -514,14 +503,12 @@ async function sendToTelegram() {
                 alert(i18nMsgs.roomTimeErr[currentLang] || i18nMsgs.roomTimeErr.en);
                 return;
             }
-
             if (subTotalForCheck < MIN_ROOM_AMOUNT) {
                 alert(i18nMsgs.minAmountErr[currentLang] || i18nMsgs.minAmountErr.en);
                 return;
             }
         }
 
-        // 🌟 房号处理：客户端 localStorage 缓存与自动记忆
         let roomInfo = "";
         if (tableNo === 'room') {
             const savedRoom = localStorage.getItem('pholinlin_room_no') || "";
@@ -530,28 +517,23 @@ async function sendToTelegram() {
                 : (i18nMsgs.inputRoom[currentLang] || i18nMsgs.inputRoom.en);
 
             let inputRoom = prompt(promptMsg, savedRoom);
-            if (inputRoom === null) return; // 用户点击取消
+            if (inputRoom === null) return;
             
             roomInfo = inputRoom.trim() ? inputRoom.trim() : savedRoom;
             if (!roomInfo) {
                 alert(currentLang === 'zh' ? "⚠️ 房号不能为空！" : "⚠️ Room number cannot be empty!");
                 return;
             }
-
             localStorage.setItem('pholinlin_room_no', roomInfo);
         }
 
         let selectedPlatform = "";
         if (tableNo === 'app') {
             const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n(请输入数字 1-4 / Enter 1-4)");
-            if (!platformInput) return; // 用户取消输入
-            
+            if (!platformInput) return;
             const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda" };
             selectedPlatform = pMap[platformInput.trim()];
-            if (!selectedPlatform) {
-                alert("⚠️ 无效选择 / Invalid selection");
-                return;
-            }
+            if (!selectedPlatform) { alert("⚠️ 无效选择 / Invalid selection"); return; }
         }
 
         if (isSubmitting) return;
@@ -562,7 +544,6 @@ async function sendToTelegram() {
                            (tableNo === 'app') ? `🛵 外卖平台 / App: ${selectedPlatform}` :
                            (tableNo === 'out') ? "🥡 打包 / Mang về" : `🪑 桌号 / Bàn: ${tableNo}`;
 
-        // 使用纯文本格式，避免 Markdown 解析出错
         let message = `📍 ${displayTable}\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 New Order!\n--------------------------\n`;
         
         let subTotal = 0;
@@ -576,12 +557,18 @@ async function sendToTelegram() {
                     processedIds.add(item.id);
                     const qty = cart[item.id];
                     const itemTotal = qty * item.price;
-                    message += `▪️ ${item.name.vi} (${item.name.zh})\n   SL: ${qty}\n\n`;
+
+                    // 🧹 1. 过滤 HTML 标签，避免标签传到 Telegram
+                    const cleanNameVi = item.name.vi.replace(/<[^>]*>/g, '');
+                    const cleanNameZh = item.name.zh.replace(/<[^>]*>/g, '');
+
+                    message += `▪️ ${cleanNameVi} (${cleanNameZh})\n   SL: ${qty}\n\n`;
                     subTotal += itemTotal;
 
+                    // 🍲 2. 排除 ID 908 (煎蛋换葱蛋)，不计入餐点份数
                     if (item.id >= 1000) {
                         drinkQty += qty;
-                    } else {
+                    } else if (item.id !== 908) {
                         foodQty += qty;
                     }
                 }
@@ -599,7 +586,6 @@ async function sendToTelegram() {
 
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
         
-        // 修正 Request 配置，提升浏览器跨域兼容性
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
