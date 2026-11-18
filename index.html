@@ -2,25 +2,28 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pho Linlin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Pho Linlin 點餐系統</title>
+    <!-- Telegram WebApp SDK 官方套件 -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* 基础重置：PC端背景设为灰色 */
+        /* 基礎重置：PC端背景設為灰色 */
+        * { box-sizing: border-box; }
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
-            background: #e0e0e0; 
+            background: #e0e0e0;
         }
 
-        /* 核心容器：限制最大宽度并居中，模拟手机屏幕 */
+        /* 核心容器：限制最大寬度並置中，模擬手機螢幕 */
         body { 
-            font-family: -apple-system, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
             display: flex; 
             flex-direction: column; 
             max-width: 500px; 
             margin: 0 auto;  
-            background: #f4f4f4; 
+            background: #f8f9fa; 
             color: #333; 
             touch-action: manipulation; 
             -webkit-text-size-adjust: 100%;
@@ -29,116 +32,432 @@
             overflow: hidden;
         }
 
-        header { padding: 10px; background: #fff; border-bottom: 1px solid #eee; text-align: center; position: sticky; top: 0; z-index: 100; }
-        .lang-switch { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-bottom: 5px; }
-        .lang-switch button { padding: 5px 10px; border: 1px solid #ddd; border-radius: 20px; background: #fff; font-size: 11px; cursor: pointer; }
+        header { 
+            background: #fff; 
+            border-bottom: 1px solid #eee; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+        }
+
+        .lang-switch { 
+            display: flex; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            gap: 6px; 
+            padding: 10px 10px 6px; 
+        }
+        .lang-switch button { 
+            padding: 5px 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 20px; 
+            background: #fff; 
+            color: #666;
+            font-size: 11px; 
+            font-weight: 500;
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        .lang-switch button.active {
+            background: #ff5722;
+            color: #fff;
+            border-color: #ff5722;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(255,87,34,0.3);
+        }
+
+        /* 桌號 / 狀態提示列 */
+        .table-banner {
+            background: #fff3e0;
+            color: #e65100;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #ffe0b2;
+        }
+        .table-banner.error {
+            background: #ffebee;
+            color: #c62828;
+            border-top-color: #ffcdd2;
+        }
+
+        /* 成功提示橫幅 (status=done) */
+        .success-banner {
+            display: none;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid #c8e6c9;
+            animation: fadeIn 0.4s ease;
+        }
         
         .main { 
             display: flex; 
             flex: 1; 
             overflow: hidden; 
             background: #fff; 
-            height: calc(100vh - 50px); 
+            height: calc(100vh - 120px); 
         }
         
         #sidebar { 
-            width: 90px; 
+            width: 88px; 
             background: #f8f8f8; 
             overflow-y: auto; 
             flex-shrink: 0; 
             border-right: 1px solid #eee; 
             -webkit-overflow-scrolling: touch; 
-            padding-bottom: 120px; 
+            padding-bottom: 180px; 
         }
 
         .tab { 
-            padding: 20px 8px; 
+            padding: 16px 6px; 
             cursor: pointer; 
             border-bottom: 1px solid #eee; 
             font-size: 12px; 
             text-align: center; 
             color: #666; 
             word-break: break-all; 
-            min-height: 40px; 
+            min-height: 48px; 
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
         }
         
-        .tab.active { background: #fff; font-weight: bold; color: #ff5722; border-left: 4px solid #ff5722; }
+        .tab.active { 
+            background: #fff; 
+            font-weight: bold; 
+            color: #ff5722; 
+            border-left: 4px solid #ff5722; 
+        }
         
-        #content { flex: 1; padding: 15px; overflow-y: auto; background: #fff; padding-bottom: 150px; }
-        .card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; align-items: center; }
-        .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #eee; flex-shrink: 0; }
+        #content { 
+            flex: 1; 
+            padding: 12px 14px 180px; 
+            overflow-y: auto; 
+            background: #fff; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .card { 
+            display: flex; 
+            gap: 12px; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #f2f2f2; 
+            align-items: center; 
+        }
+        .item-img { 
+            width: 70px; 
+            height: 70px; 
+            border-radius: 8px; 
+            object-fit: cover; 
+            background: #f0f0f0; 
+            flex-shrink: 0; 
+        }
         
-        .info { flex: 1; }
-        .name { font-size: 14px; font-weight: 600; display: block; margin-bottom: 4px; line-height: 1.3; }
-        .price { color: #ff5722; font-weight: bold; }
+        .info { flex: 1; min-width: 0; }
+        .name { 
+            font-size: 14px; 
+            font-weight: 600; 
+            display: block; 
+            margin-bottom: 4px; 
+            line-height: 1.35; 
+            word-break: break-word;
+        }
+        .price { color: #ff5722; font-weight: bold; font-size: 14px; }
+        .badge-special {
+            display: inline-block;
+            background: #ffebee;
+            color: #e53935;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
         
-        .stepper { display: flex; align-items: center; gap: 10px; }
-        .btn-step { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ff5722; background: #fff; color: #ff5722; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; }
+        .stepper { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .btn-step { 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            border: 1px solid #ff5722; 
+            background: #fff; 
+            color: #ff5722; 
+            font-size: 18px; 
+            font-weight: bold;
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            touch-action: manipulation;
+            transition: transform 0.1s;
+        }
+        .btn-step:active { transform: scale(0.9); }
         .btn-step.add { background: #ff5722; color: #fff; }
-        .count { font-weight: bold; min-width: 15px; text-align: center; }
+        .count { font-weight: bold; min-width: 18px; text-align: center; font-size: 14px; }
         
+        /* 底部固定結帳區 */
         footer { 
-            padding: 15px; 
+            padding: 10px 14px; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
             background: #fff; 
             border-top: 1px solid #eee; 
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
+            box-shadow: 0 -3px 12px rgba(0,0,0,0.08); 
             position: absolute; 
             bottom: 0;
             left: 0;
             right: 0;
             z-index: 101;
         }
+
+        /* 購物車概覽點擊條 */
+        .cart-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cart-info-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .cart-view-link {
+            font-size: 11px;
+            color: #ff5722;
+            font-weight: normal;
+            text-decoration: underline;
+            margin-left: 4px;
+        }
         
-        .cart-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
-        #btn-order { background: #ff5722; color: #fff; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        #btn-order:disabled { background: #ccc; cursor: not-allowed; }
-        .closed-msg { color: #777; font-size: 13px; text-align: center; margin-top: 8px; font-weight: 500; }
+        /* 備註輸入框 */
+        .note-container {
+            margin: 6px 0 8px;
+        }
+        .note-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #fafafa;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .note-input:focus {
+            border-color: #ff5722;
+            background: #fff;
+        }
+
+        #btn-order { 
+            background: #ff5722; 
+            color: #fff; 
+            border: none; 
+            padding: 13px; 
+            border-radius: 30px; 
+            width: 100%; 
+            font-size: 15px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            box-shadow: 0 3px 8px rgba(255,87,34,0.3);
+        }
+        #btn-order:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            box-shadow: none;
+        }
+        .closed-msg { 
+            color: #777; 
+            font-size: 12px; 
+            text-align: center; 
+            margin-top: 6px; 
+            font-weight: 500; 
+        }
+
+        /* 購物車明細彈窗 Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: flex-end;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-sheet {
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px 16px 0 0;
+            padding: 16px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            max-height: 75vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.25s ease;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-title { font-size: 16px; font-weight: bold; }
+        .modal-clear { font-size: 12px; color: #999; cursor: pointer; border: none; background: none; }
+        .modal-clear:hover { color: #f44336; }
+        .modal-close { font-size: 20px; color: #666; cursor: pointer; border: none; background: none; padding: 0 4px; }
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+            padding: 10px 0;
+        }
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f7f7f7;
+        }
+        .cart-item-name { font-size: 14px; font-weight: 500; flex: 1; padding-right: 8px; }
+        .cart-item-price { color: #ff5722; font-weight: bold; font-size: 14px; margin-right: 12px; }
+
+        /* 外賣平台/房號彈窗 */
+        .prompt-modal {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            margin: auto;
+        }
+        .platform-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .platform-btn {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fdfdfd;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .platform-btn:active {
+            background: #ff5722;
+            color: #fff;
+            border-color: #ff5722;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <header>
     <div class="lang-switch">
-        <button onclick="setLang('zh')">中文</button>
-        <button onclick="setLang('en')">EN</button>
-        <button onclick="setLang('km')">ខ្មែរ</button>
-        <button onclick="setLang('vi')">VN</button>
-        <button onclick="setLang('ja')">日本語</button>
-        <button onclick="setLang('ko')">한국어</button>
+        <button id="lang-zh" onclick="setLang('zh')">中文</button>
+        <button id="lang-en" onclick="setLang('en')">EN</button>
+        <button id="lang-km" onclick="setLang('km')">ខ្មែរ</button>
+        <button id="lang-vi" onclick="setLang('vi')">VN</button>
+        <button id="lang-ja" onclick="setLang('ja')">日本語</button>
+        <button id="lang-ko" onclick="setLang('ko')">한국어</button>
     </div>
+    <div id="table-banner" class="table-banner">
+        <span id="table-banner-text">📍 載入中...</span>
+        <span id="table-mode-badge" style="font-size:11px; opacity:0.8;"></span>
+    </div>
+    <div id="success-banner" class="success-banner"></div>
 </header>
 
 <div class="main">
     <div id="sidebar"></div>
     <div id="content">
-        <h2 id="cat-display" style="margin-top:0; font-size: 1.2em;"></h2>
+        <h2 id="cat-display" style="margin-top:0; font-size: 1.15em; color: #222;"></h2>
         <div id="items-container"></div>
     </div>
 </div>
 
 <footer>
-    <div class="cart-summary">
-        <span id="cart-count">合计: 0 份</span>
-        <span id="cart-total" style="color:#ff5722; font-size: 1.2em;">$0.00</span>
+    <!-- 購物車概覽點擊條 -->
+    <div class="cart-bar" onclick="openCartModal()">
+        <div class="cart-info-left">
+            <span>🛒</span>
+            <span id="cart-count">合計: 0 份</span>
+            <span class="cart-view-link" id="cart-view-text">查看明細</span>
+        </div>
+        <div id="cart-total" style="color:#ff5722; font-size: 1.25em; font-weight: bold;">$0.00</div>
     </div>
-    <button id="btn-order" onclick="sendToTelegram()">发送订单</button>
+
+    <!-- 客戶備註欄 -->
+    <div class="note-container">
+        <input type="text" id="order-note" class="note-input" placeholder="備註：如不要香菜、少辣、豆芽燙熟..." maxlength="100">
+    </div>
+
+    <button id="btn-order" onclick="startOrderProcess()">點好了，發送訂單</button>
     <div id="closed-info" class="closed-msg"></div>
 </footer>
 
+<!-- 購物車明細彈窗 (Cart Modal) -->
+<div id="cart-modal" class="modal-overlay" onclick="closeCartModal(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="cart-modal-title">🛒 已點清單</span>
+            <div>
+                <button class="modal-clear" onclick="clearCart()" id="cart-clear-text">清空</button>
+                <button class="modal-close" onclick="closeCartModal()">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" id="cart-modal-items">
+            <!-- 動態插入已點商品 -->
+        </div>
+        <div style="border-top: 1px solid #eee; padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight:bold;" id="cart-modal-total-label">總計:</span>
+            <span id="cart-modal-total" style="color:#ff5722; font-size: 1.3em; font-weight:bold;">$0.00</span>
+        </div>
+    </div>
+</div>
+
+<!-- 自訂通用對話彈窗 (取代原生 prompt) -->
+<div id="custom-modal" class="modal-overlay">
+    <div class="prompt-modal" id="custom-modal-content">
+        <!-- 動態填入內容 -->
+    </div>
+</div>
+
 <script>
-// --- 配置区 ---
-const TELEGRAM_TOKEN = '8765969177:AAGJmmNv8FxevpwzD61y5FHyzOule7545zk'; 
-const CHAT_ID = '-5238447566';
+// --- 配置區 ---
+// 🔒 Google Apps Script 安全中繼站（保護 Bot Token 並自動記錄至 Google 試算表）
+const GAS_RELAY_URL = 'https://script.google.com/macros/s/AKfycbxmz1NLo94EoVhqJKW7IT1Psvp5-O5fuBkrH0w-1HeTPpSF_4afjvpUBnnLRDNf6X18Xw/exec';
+
 const OPEN_HOUR = 7; 
 const CLOSE_HOUR = 23; 
 
-// 🚨 临时店休开关：true 为休息（禁止点餐），false 为营业
+// 🚨 臨時店休開關：true 為休息（禁止點餐），false 為營業
 const IS_CLOSED_TODAY = false; 
 
-// 🛵 临时外送限制开关：true 为允许外送，false 为暂停外送（针对 table=room 住户拦截）
+// 🛵 臨時外送限制開關：true 為允許外送，false 為暫停外送（針對 table=room 住戶攔截）
 const IS_DELIVERY_ENABLED = true; 
 
 // --- 公寓配送配置 ---
@@ -147,9 +466,24 @@ const ROOM_DELIVERY_END = 18;
 const DELIVERY_FEE = 0.5;       
 const MIN_ROOM_AMOUNT = 2.0;    
 
+// --- Telegram WebApp 初始化 ---
+const tg = window.Telegram?.WebApp;
+const isTG = Boolean(tg && tg.initData);
+const tgUser = tg?.initDataUnsafe?.user;
+
+if (tg) {
+    try {
+        tg.ready();
+        tg.expand(); // 自動將小程式撐開至全螢幕
+        if (tg.enableClosingConfirmation) tg.enableClosingConfirmation(); // 防誤觸滑動關閉
+    } catch(e) {}
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 let rawTable = urlParams.get('table') || "";
+if (!rawTable && isTG) rawTable = "tg"; // 若在 Telegram 內且未帶 table 參數，預設為 tg
 const tableNo = rawTable.toLowerCase();
+const urlStatus = urlParams.get('status') || "";
 
 let currentLang = urlParams.get('lang') || 'zh';
 let currentCatIndex = 0;
@@ -168,7 +502,7 @@ const i18nMsgs = {
         ko: "📢 WOWNOW에서 'PHO Linlin'을 검색하세요 📢"
     },
     deliveryDisabled: {
-        zh: "📢 今日老板无法外送，WOWNOW搜 \"Pholinlin\" 📢",
+        zh: "📢 今日老闆無法外送，WOWNOW搜尋 \"Pholinlin\" 📢",
         en: "📢 No delivery today, please search \"Pholinlin\" on WOWNOW 📢",
         km: "📢 ថ្ងៃនេះមិនមានសេវាដឹកជញ្ជូនទេ សូមស្វែងរក \"Pholinlin\" លើ WOWNOW 📢",
         vi: "📢 Hôm nay không giao hàng, vui lòng tìm \"Pholinlin\" trên WOWNOW 📢",
@@ -176,58 +510,83 @@ const i18nMsgs = {
         ko: "📢 오늘은 배달이 불가능합니다. WOWNOW에서 'Pholinlin'을 검색해주세요 📢"
     },
     success: { 
-        zh: "✅ 订单已发送！", en: "✅ Order Sent!", km: "✅ បានបញ្ជូនការបញ្ជាទិញ!", vi: "✅ Gửi đơn hàng thành công!",
-        ja: "✅ 注文が送信されました！", ko: "✅ 주문이 전송되었습니다!"
+        zh: "✅ 訂單已成功送達廚房！正在為您準備餐點。", 
+        en: "✅ Order Sent! Your meal is being prepared.", 
+        km: "✅ បានបញ្ជូនការបញ្ជាទិញ! កំពុងរៀបចំអាហារ។", 
+        vi: "✅ Đơn hàng đã gửi đến bếp! Món ăn đang được chuẩn bị.",
+        ja: "✅ 注文が送信されました！厨房で調理中です。", 
+        ko: "✅ 주문이 전송되었습니다! 음식을 준비 중입니다."
     },
     closed: { 
-        zh: "抱歉，我们已经打烊了！", en: "Sorry, we are closed!", km: "សូមទោស យើងត្រូវបានបិទ!", vi: "Xin lỗi, chúng tôi đã đóng cửa!",
-        ja: "申し訳ありません、本日の営業は終了しました。", ko: "죄송합니다, 영업이 종료되었습니다!"
+        zh: "抱歉，我們已經打烊了！", en: "Sorry, we are closed!", km: "សូមទោស យើងត្រូវបានបិទ!", vi: "Xin lỗi, chúng tôi đã đóng cửa!",
+        ja: "申し訳ありません、営業終了しました。", ko: "죄송합니다, 영업이 종료되었습니다!"
     },
     error: { 
-        zh: "⚠️ 发送失败，请稍后重试。", en: "⚠️ Failed to send, please try again.", km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត。", vi: "⚠️ Gửi thất bại, vui lòng thử lại sau.",
-        ja: "⚠️ 送信に失敗しました。後ほどもう一度お试しください。", ko: "⚠️ 전송 실패, 잠시 후 다시 시도해주세요."
+        zh: "⚠️ 發送失敗，請稍後重試。", en: "⚠️ Failed to send, please try again.", km: "⚠️ ការផ្ញើបានបរាជ័យ សូមព្យាយាមម្ដងទៀត។", vi: "⚠️ Gửi thất bại, vui lòng thử lại sau.",
+        ja: "⚠️ 送信に失敗しました。後ほどもう一度お試しください。", ko: "⚠️ 전송 실패, 잠시 후 다시 시도해주세요."
     },
     invalidTable: { 
-        zh: "⚠️ 无效桌号，请扫描正确的二维码。", en: "⚠️ Invalid table. Please scan the correct QR code.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ。", vi: "⚠️ Số bàn không hợp lệ.",
-        ja: "⚠️ 無効なテーブル番号です。正しいQRコードをスキャンしてください。", ko: "⚠️ 유효하지 않은 테이블 번호입니다. 올바른 QR코드를 스캔해주세요."
+        zh: "⚠️ 無效桌號，請掃描桌上正確的QR Code。", en: "⚠️ Invalid table. Please scan the QR code.", km: "⚠️ លេខតុមិនត្រឹមត្រូវ។", vi: "⚠️ Số bàn không hợp lệ. Vui lòng quét mã QR.",
+        ja: "⚠️ 無効なテーブル番号です。正しいQRコードをスキャンしてください。", ko: "⚠️ 유효하지 않은 테이블 번호입니다. QR코드를 다시 스캔해주세요."
     },
-    inputRoom: { 
-        zh: `请输入您的房号：(须收取$${DELIVERY_FEE.toFixed(2)}运费)`, 
-        en: `Please enter your room number: ($${DELIVERY_FEE.toFixed(2)} fee applies)`, 
-        km: `សូមបញ្ចូលលេខបន្ទប់របស់អ្នក: (ថ្លៃដឹកជញ្ជូន ${DELIVERY_FEE}$)`, 
-        vi: `Vui lòng nhập số phòng của bạn: (Phí giao hàng là ${DELIVERY_FEE}$)` ,
-        ja: `部屋番号を入力してください：（配送料 $${DELIVERY_FEE.toFixed(2)}）`,
-        ko: `방 번호를 입력해주세요: (배달료 $${DELIVERY_FEE.toFixed(2)})`
+    inputRoomTitle: { 
+        zh: `請輸入您的公寓房號：(需加收 $${DELIVERY_FEE.toFixed(2)} 運費)`, 
+        en: `Enter room number: ($${DELIVERY_FEE.toFixed(2)} delivery fee applies)`, 
+        km: `សូមបញ្ចូលលេខបន្ទប់: (ថ្លៃដឹកជញ្ជូន ${DELIVERY_FEE}$)`, 
+        vi: `Vui lòng nhập số phòng: (Phí giao hàng ${DELIVERY_FEE}$)` ,
+        ja: `部屋番号を入力してください（配送料 $${DELIVERY_FEE.toFixed(2)}）`,
+        ko: `방 번호를 입력해주세요 (배달료 $${DELIVERY_FEE.toFixed(2)})`
     },
     roomTimeErr: {
-        zh: `🏢 公寓配送时间为 ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}，现在无法下单。`,
+        zh: `🏢 公寓配送時間為 ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}，現在非配送時段。`,
         en: `🏢 Apartment delivery is only available ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}.`,
         km: `🏢 សេវាដឹកជញ្ជូនខុនដូមានចាប់ពីម៉ោង ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}។`,
-        vi: `🏢 Thời gian giao hàng chung cư là ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}.`,
-        ja: `🏢 マンションへの配送時間は ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)} です。現在ご注文いただけません。`,
-        ko: `🏢 아파트 배달 시간은 ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)} 입니다. 현재 주문이 불가능합니다.`
+        vi: `🏢 Thời gian giao chung cư là ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)}.`,
+        ja: `🏢 マンションへの配達時間は ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)} です。`,
+        ko: `🏢 아파트 배달 시간은 ${fmtT(ROOM_DELIVERY_START)} - ${fmtT(ROOM_DELIVERY_END)} 입니다.`
     },
     minAmountErr: {
-        zh: `🏢 公寓配送订单最低消费须满 $${MIN_ROOM_AMOUNT.toFixed(2)} (不含运费)。`,
+        zh: `🏢 公寓外送訂單金額需滿 $${MIN_ROOM_AMOUNT.toFixed(2)} (不含運費)。`,
         en: `🏢 Minimum order for delivery is $${MIN_ROOM_AMOUNT.toFixed(2)} (excl. fee).`,
         km: `🏢 ការបញ្ជាទិញខុនដូត្រូវមានយ៉ាងហោចណាស់ $${MIN_ROOM_AMOUNT.toFixed(2)}។`,
-        vi: `🏢 Đơn hàng chung cư tối thiểu phải từ $${MIN_ROOM_AMOUNT.toFixed(2)} (chưa ship).`,
-        ja: `🏢 マンション配送は最低消費額 $${MIN_ROOM_AMOUNT.toFixed(2)} から承ります（配送料除く）。`,
-        ko: `🏢 아파트 배달은 최소 $${MIN_ROOM_AMOUNT.toFixed(2)} 이상 주문 시 가능합니다 (배달료 제외).`
+        vi: `🏢 Đơn hàng chung cư tối thiểu phải từ $${MIN_ROOM_AMOUNT.toFixed(2)} (chưa gồm ship).`,
+        ja: `🏢 マンション配送は最低消費額 $${MIN_ROOM_AMOUNT.toFixed(2)} から承ります。`,
+        ko: `🏢 아파트 배달은 최소 $${MIN_ROOM_AMOUNT.toFixed(2)} 이상 주문 시 가능합니다.`
+    },
+    notePlaceholder: {
+        zh: "備註：如不要香菜、少辣、豆芽燙熟...",
+        en: "Notes: e.g. no cilantro, less spicy, well-done sprouts...",
+        km: "ចំណាំ៖ មិនយកជី, មិនហឹរ...",
+        vi: "Ghi chú: không hành, ít cay, giá chín...",
+        ja: "備考：パクチー抜き、辛さ控えめ、もやし加熱...",
+        ko: "요청사항: 고수 제외, 덜 맵게, 숙주 익혀서..."
+    },
+    cartDetails: {
+        zh: "查看明細", en: "View Cart", km: "មើលបញ្ជី", vi: "Xem giỏ hàng", ja: "注文詳細", ko: "주문 내역"
+    },
+    cartTitle: {
+        zh: "🛒 已點清單", en: "🛒 Your Order", km: "🛒 បញ្ជីបានកុម្មង់", vi: "🛒 Món đã chọn", ja: "🛒 注文リスト", ko: "🛒 장바구니"
+    },
+    clearCart: {
+        zh: "清空", en: "Clear", km: "លុបទាំងអស់", vi: "Xóa hết", ja: "クリア", ko: "비우기"
+    },
+    limit5: {
+        zh: "每款限購5份", en: "Limit 5 per item", km: "កំណត់ត្រឹម 5 ក្នុងមួយមុខ", vi: "Giới hạn tối đa 5 phần", ja: "1品につき最大5個まで", ko: "품목당 최대 5개까지"
     }
 };
 
-// --- 规范化全局加购/单点品定义 ---
-const EXTRA_CHICKEN = { id: 901, name: { zh: "加购炸鸡腿", en: "Add Chicken Leg", km: "បន្ថែមភ្លៅមាន់បំពង", vi: "Thêm đùi gà chiên", ja: "フライドチキンレッグ追加", ko: "후라이드 닭다리 추가" }, price: 2.5, img: "img/IMG_2316.PNG" };
-const EXTRA_EGG = { id: 902, name: { zh: "加购煎蛋(全熟)", en: "Add Fried Egg (Well Done)", km: "បន្ថែមពងទាចៀន (ឆ្អិន)", vi: "Thêm trứng chiên (Chín kỹ)", ja: "目玉焼き(良く焼き)追加", ko: "계란후라이(완숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
-const EXTRA_EGG_SOFT = { id: 903, name: { zh: "加购煎蛋(不熟)", en: "Add Fried Egg (Over Easy)", km: "បន្ថែមពងទាចៀន (ជ័រភ្នៅ)", vi: "Thêm trứng chiên (Lòng đào)", ja: "目玉焼き(半熟)追加", ko: "계란후라이(반숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
-const EXTRA_EGG_GREEN = { id: 904, name: { zh: "加购葱蛋", en: "Add Scallion Omelet", km: "បន្ថែមពងទាចៀនស្លឹកខ្ទឹម", vi: "Thêm trứng chiên hành", ja: "ネギ入り卵焼き追加", ko: "파계란말이 추가" }, price: 0.6, img: "img/segg.png" };
-const EXTRA_BAGUETTE = { id: 905, name: { zh: "加购短法棍(2个)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미니 바게토(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
-const EXTRA_BEEF = { id: 906, name: { zh: "加购牛肉", en: "Add Beef", km: "បន្ថែមសាច់គោ", vi: "Thêm thịt bò", ja: "牛肉追加", ko: "소고기 추가" }, price: 1.0, img: "" };
-const SWAP_EGG = { id: 908, name: { zh: "<span style='color:#ff3b30; font-weight:bold;'>🔥 煎蛋换葱蛋(限饭类)</span>", en: "<span style='color:#ff3b30; font-weight:bold;'>🔥 Swap Fried Egg for Scallion Omelet</span>", km: "<span style='color:#ff3b30; font-weight:bold;'>🔥 ដូរពងទាចៀនទៅពងទាចៀនស្លឹកខ្ទឹម</span>", vi: "<span style='color:#ff3b30; font-weight:bold;'>🔥 Đổi trứng chiên thành trứng hành</span>", ja: "<span style='color:#ff3b30; font-weight:bold;'>🔥 目玉焼きをネギ入り卵焼きに変更</span>", ko: "<span style='color:#ff3b30; font-weight:bold;'>🔥 계란후라이를 파계란말이로 변경</span>" }, price: 0, img: "img/segg.png" };
-const EXTRA_COFFEE = { id: 1001, name: { zh: "加购越南炼乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá", ja: "ベトナムミルクコーヒー追加", ko: "베트남 연유커피 추가" }, price: 1, img: "img/MILKCOFEE.png" };
-const EXTRA_LEMON_TEA = { id: 1003, name: { zh: "加购柠檬茶", en: "Add Lemon Tea", km: "បន្ថែមតែក្រូចឆ្មា", vi: "Thêm trà chanh", ja: "レモンティー追加", ko: "레몬티 추가" }, price: 1, img: "img/LEMON_TEA.png" };
-const EXTRA_PLUM = { id: 1010, name: { zh: "加购酸梅汤", en: "Add Plum Juice", km: "បន្ថែមទឹកផ្លែជូរ", vi: "Thêm nước xí muội", ja: "梅ジュース追加", ko: "매실차 추가" }, price: 1, img: "img/PLUM.png" };
+// --- 規範化全域加購/單點品定義 ---
+const EXTRA_CHICKEN = { id: 901, name: { zh: "加購炸雞腿", en: "Add Chicken Leg", km: "បន្ថែមភ្លៅមាន់បំពង", vi: "Thêm đùi gà chiên", ja: "フライドチキンレッグ追加", ko: "후라이드 닭다리 추가" }, price: 2.5, img: "img/IMG_2316.PNG" };
+const EXTRA_EGG = { id: 902, name: { zh: "加購煎蛋(全熟)", en: "Add Fried Egg (Well Done)", km: "បន្ថែមពងទាចៀន (ឆ្អិន)", vi: "Thêm trứng chiên (Chín kỹ)", ja: "目玉焼き(良く焼き)追加", ko: "계란후라이(완숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
+const EXTRA_EGG_SOFT = { id: 903, name: { zh: "加購煎蛋(半熟)", en: "Add Fried Egg (Over Easy)", km: "បន្ថែមពងទាចៀន (ជ័រភ្នៅ)", vi: "Thêm trứng chiên (Lòng đào)", ja: "目玉焼き(半熟)追加", ko: "계란후라이(반숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
+const EXTRA_EGG_GREEN = { id: 904, name: { zh: "加購蔥蛋", en: "Add Scallion Omelet", km: "បន្ថែមពងទាចៀនស្លឹកខ្ទឹម", vi: "Thêm trứng chiên hành", ja: "ネギ入り卵焼き追加", ko: "파계란말이 추가" }, price: 0.6, img: "img/segg.png" };
+const EXTRA_BAGUETTE = { id: 905, name: { zh: "加購短法棍(2個)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미니 바게토(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
+const EXTRA_BEEF = { id: 906, name: { zh: "加購牛肉", en: "Add Beef", km: "បន្ថែមសាច់គោ", vi: "Thêm thịt bò", ja: "牛肉追加", ko: "소고기 추가" }, price: 1.0, img: "img/IMG_2263.PNG" };
+const EXTRA_MEATBALL = { id: 907, name: { zh: "加購牛肉丸", en: "Add Beef Meatballs", km: "បន្ថែមប្រហិតសាច់គោ", vi: "Thêm bò viên", ja: "牛肉団子追加", ko: "소고기 완자 추가" }, price: 1.0, img: "img/NO.png" };
+const SWAP_EGG = { id: 908, isSwap: true, name: { zh: "🔥 煎蛋換蔥蛋 (限飯類)", en: "🔥 Swap Fried Egg for Scallion Omelet", km: "🔥 ដូរពងទាចៀនទៅពងទាចៀនស្លឹកខ្ទឹម", vi: "🔥 Đổi trứng chiên thành trứng hành", ja: "🔥 目玉焼きをネギ入り卵焼きに変更", ko: "🔥 계란후라이를 파계란말이로 변경" }, price: 0, img: "img/segg.png" };
+const EXTRA_COFFEE = { id: 1001, name: { zh: "加購越南煉乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá", ja: "ベトナムミルクコーヒー追加", ko: "베트남 연유커피 추가" }, price: 1, img: "img/MILKCOFEE.png" };
+const EXTRA_LEMON_TEA = { id: 1003, name: { zh: "加購檸檬茶", en: "Add Lemon Tea", km: "បន្ថែមតែក្រូចឆ្មា", vi: "Thêm trà chanh", ja: "レモンティー追加", ko: "레몬티 추가" }, price: 1, img: "img/LEMON_TEA.png" };
+const EXTRA_PLUM = { id: 1010, name: { zh: "加購酸梅湯", en: "Add Plum Juice", km: "បន្ថែមទឹកផ្លែជូរ", vi: "Thêm nước xí muội", ja: "梅ジュース追加", ko: "매실차 추가" }, price: 1, img: "img/PLUM.png" };
 
 const menuData = [
     {
@@ -235,113 +594,122 @@ const menuData = [
         items: [
             { id: 101, name: { zh: "A1.越南牛肉河粉", en: "A1.Beef PHO", km: "A1.ហ្វឺសាច់គោ", vi: "A1.Phở bò", ja: "A1.牛肉のフォー", ko: "A1.소고기 쌀국수" }, price: 3, img: "img/IMG_2263.PNG" },
             { id: 102, name: { zh: "A2.越南牛肉河粉(大份)", en: "A2.Beef PHO (Large)", km: "A2.ហ្វឺសាច់គោ (ធំ)", vi: "A2.Phở bò (Lớn)", ja: "A2.牛肉のフォー(大盛)", ko: "A2.소고기 쌀국수(곱배기)" }, price: 5, img: "img/IMG_2263.PNG" },
-            { id: 103, name: { zh: "A3.越南牛肉汤面线", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Phở nước bún", ja: "A3.牛肉スープの細米粉麺", ko: "A3.소고기 버미셀리 국수" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 104, name: { zh: "A4.越南牛肉汤泡面", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Phở mì bò", ja: "A4.牛肉スープのインスタント麺", ko: "A4.소고기 국물 라면" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 105, name: { zh: "A5.越南牛肉汤泡饭", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Phở cơm bò", ja: "A5.牛肉クッパ風ライス", ko: "A5.소고기 국밥" }, price: 3, img: "img/IMG_2263.PNG" },
-            { id: 106, name: { zh: "A6.越南牛肉粉丝", en: "A6.Beef Soup with Glass Noodles", km: "A6.ហ្វឺមីសរសៃកញ្ចក់សាច់គោ", vi: "A6.Phở miến bò", ja: "A6.牛肉スープの春雨麺", ko: "A6.소고기 당면 국수" }, price: 3.5, img: "img/IMG_2263.PNG" },
+            { id: 103, name: { zh: "A3.越南牛肉湯麵線", en: "A3.Beef Soup with Vermicelli", km: "A3.ហ្វឺសរសៃតូចសាច់គោ", vi: "A3.Phở nước bún", ja: "A3.牛肉スープの細米粉麺", ko: "A3.소고기 버미셀리 국수" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 104, name: { zh: "A4.越南牛肉湯泡麵", en: "A4.Beef Soup with Instant Noodle", km: "A4.ហ្វឺមីសាច់គោ", vi: "A4.Phở mì bò", ja: "A4.牛肉スープのインスタント麺", ko: "A4.소고기 국물 라면" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 105, name: { zh: "A5.越南牛肉湯泡飯", en: "A5.Beef Soup with Rice", km: "A5.បាយស៊ុបសាច់គោ", vi: "A5.Phở cơm bò", ja: "A5.牛肉クッパ風ライス", ko: "A5.소고기 국밥" }, price: 3, img: "img/IMG_2263.PNG" },
+            { id: 106, name: { zh: "A6.越南牛肉粉絲", en: "A6.Beef Soup with Glass Noodles", km: "A6.ហ្វឺមីសរសៃកញ្ចក់សាច់គោ", vi: "A6.Phở miến bò", ja: "A6.牛肉スープの春雨麺", ko: "A6.소고기 당면 국수" }, price: 3.5, img: "img/IMG_2263.PNG" },
+            EXTRA_BEEF, EXTRA_MEATBALL, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
+        ]
+    },
+    {
+        cat: { zh: "B.高棉粿條", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer", ja: "B.クメールクィティオ", ko: "B.크메르 쿠이티오" },
+        items: [
+            { id: 201, name: { zh: "B1.高棉粿條", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu Khmer", ja: "B1.クメール風ライスヌードル", ko: "B1.크메르 쌀국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 202, name: { zh: "B2.高棉粿條湯麵線", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Hủ tiếu Khmer nước bún", ja: "B2.クメールスープの細米粉麺", ko: "B2.크메르 버미셀리 국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 203, name: { zh: "B3.高棉粿條湯泡麵", en: "B3.Khmer Instant Noodle Soup", km: "B3.មីគុយទាវ", vi: "B3.Hủ tiếu Khmer mì", ja: "B3.クメールスープのインスタント麺", ko: "B3.크메르 국물 라면" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 204, name: { zh: "B4.高棉粿條湯泡飯", en: "B4.Khmer Soup Rice", km: "B4.បាយស៊ុប", vi: "B4.Hủ tiếu Khmer cơm", ja: "B4.クメール風スープライス", ko: "B4.크메르 국밥" }, price: 2.5, img: "img/IMG_2258.PNG" },
+            { id: 205, name: { zh: "B5.高棉粿條湯河粉", en: "B5.Khmer Soup Flat Noodles", km: "B5.គុយទាវសរសៃធំ", vi: "B5.Hủ tiếu Khmer bánh phở", ja: "B5.クメールスープのきしめん風ライスヌードル", ko: "B5.크메르 쌀국수(넓은면)" }, price: 2.5, img: "img/IMG_2258.PNG" },
             EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        cat: { zh: "B.高棉粿条", en: "B.Khmer Noodle Soup", km: "B.គុយទាវ", vi: "B.Hủ tiếu Khmer", ja: "B.クメールクィティオ", ko: "B.크메르 쿠이티오" },
+        cat: { zh: "C.柬式紅咖哩", en: "C.Khmer Curry", km: "C.ការីក្រហម", vi: "C.Cà ri Khmer", ja: "C.レッドカレー", ko: "C.크메르 레드카레" },
         items: [
-            { id: 201, name: { zh: "B1.高棉粿条", en: "B1.Khmer Noodle", km: "B1.គុយទាវ", vi: "B1.Hủ tiếu Khmer", ja: "B1.クメール風ライスヌードル", ko: "B1.크메르 쌀국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 202, name: { zh: "B2.高棉粿条汤面线", en: "B2.Khmer Vermicelli", km: "B2.នំបញ្ចុកស៊ុប", vi: "B2.Hủ tiếu Khmer nước bún", ja: "B2.クメールスープの細米粉麺", ko: "B2.크메르 버미셀리 국수" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 203, name: { zh: "B3.高棉粿条汤泡面", en: "B3.Khmer Instant Noodle Soup", km: "B3.មីគុយទាវ", vi: "B3.Hủ tiếu Khmer mì", ja: "B3.クメールスープのインスタント麺", ko: "B3.크메르 국물 라면" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 204, name: { zh: "B4.高棉粿条汤泡饭", en: "B4.Khmer Soup Rice", km: "B4.បាយស៊ុប", vi: "B4.Hủ tiếu Khmer cơm", ja: "B4.クメール風スープライス", ko: "B4.크메르 국밥" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            { id: 205, name: { zh: "B5.高棉粿条汤河粉", en: "B5.Khmer Soup Flat Noodles", km: "B5.គុយទាវសរសៃធំ", vi: "B5.Hủ tiếu Khmer bánh phở", ja: "B5.クメールスープのきしめん風ライスヌードル", ko: "B5.크메르 쌀국수(넓은면)" }, price: 2.5, img: "img/IMG_2258.PNG" },
-            EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
-        ]
-    },
-    {
-        cat: { zh: "C.柬式红咖喱", en: "C.Khmer Curry", km: "C.ការីក្រហម", vi: "C.Cà ri Khmer", ja: "C.レッドカレー", ko: "C.크메르 레드카레" },
-        items: [
-            { id: 301, name: { zh: "C1.柬式红咖喱面线", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri", ja: "C1.レッドカレー細米粉麺", ko: "C1.레드카레 버미셀리 국수" }, price: 2, img: "img/IMG_2260.PNG" },
-            { id: 302, name: { zh: "C2.柬式红咖喱饭", en: "C2.Red Curry with Rice", km: "C2.បាយការីក្រហម", vi: "C2.Cơm cà ri", ja: "C2.レッドカレーライス", ko: "C2.레드카레 라이스" }, price: 2.5, img: "img/IMG_2260.PNG" },
-            { id: 303, name: { zh: "C3.柬式红咖喱法棍套餐", en: "C3.Red Curry with Baguette", km: "C3.នំបុ័ងការី", vi: "C3.Bánh mì cà ri", ja: "C3.レッドカレー＆バゲットセット", ko: "C3.레드카레 バ게트 세트" }, price: 3.5, img: "img/IMG_2264.PNG" },
+            { id: 301, name: { zh: "C1.柬式紅咖哩麵線", en: "C1.Red Curry Vermicelli", km: "C1.នំបញ្ចុកការី", vi: "C1.Bún cà ri", ja: "C1.レッドカレー細米粉麺", ko: "C1.레드카레 버미셀리 국수" }, price: 2, img: "img/IMG_2260.PNG" },
+            { id: 302, name: { zh: "C2.柬式紅咖哩飯", en: "C2.Red Curry with Rice", km: "C2.បាយការីក្រហម", vi: "C2.Cơm cà ri", ja: "C2.レッドカレーライス", ko: "C2.레드카레 라이스" }, price: 2.5, img: "img/IMG_2260.PNG" },
+            { id: 303, name: { zh: "C3.柬式紅咖哩法棍套餐", en: "C3.Red Curry with Baguette", km: "C3.នំបុ័ងការី", vi: "C3.Bánh mì cà ri", ja: "C3.レッドカレー＆バゲットセット", ko: "C3.레드카레 바게트 세트" }, price: 3.5, img: "img/IMG_2264.PNG" },
             EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        hidden: true, // 🚨 暂时下架隐藏，保留代码
+        hidden: true, // 🚨 暫時下架隱藏
         cat: { zh: "D.柬式米粉", en: "D.Nom Banh Chok", km: "D.នំបញ្ចុក", vi: "D.Bún Khmer", ja: "D.伝統クメール麺", ko: "D.놈반촉" },
         items: [
             { id: 401, name: { zh: "D1.柬式米粉", en: "D1.Traditional Khmer Noodle", km: "D1.នំបញ្ចុកសម្លរប្រហើរ", vi: "D1.Bún Khmer truyền thống", ja: "D1.伝統クメール魚スープ生麺", ko: "D1.크메르 전통 生쌀국수" }, price: 1.5, img: "img/IMG_2257.PNG" },
-            { id: 402, name: { zh: "D2.柬式米粉汤泡饭", en: "D2.Nom Banh Chok Soup with Rice", km: "D2.បាយស៊ុបនំបញ្ចុក", vi: "D2.Cơm súp Khmer", ja: "D2.クメール伝統スープライス", ko: "D2.크메르 전통 국밥" }, price: 1.5, img: "img/IMG_2257.PNG" },
-            { id: 403, name: { zh: "D3.柬式米粉汤法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer", ja: "D3.クメール伝統スープ＆バゲット", ko: "D3.크메르 전통សព៌ 바ゲト" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            { id: 402, name: { zh: "D2.柬式米粉湯泡飯", en: "D2.Nom Banh Chok Soup with Rice", km: "D2.បាយស៊ុបនំបញ្ចុក", vi: "D2.Cơm súp Khmer", ja: "D2.クメール伝統スープライス", ko: "D2.크메르 전통 국밥" }, price: 1.5, img: "img/IMG_2257.PNG" },
+            { id: 403, name: { zh: "D3.柬式米粉湯法棍", en: "D3.Nom Banh Chok with Baguette", km: "D3.នំបុ័ងនំបញ្ចុក", vi: "D3.Bánh mì súp Khmer", ja: "D3.クメール伝統スープ＆バゲット", ko: "D3.크메르 전통 바게트" }, price: 2.5, img: "img/IMG_2257set.PNG" },
             EXTRA_BAGUETTE, EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        cat: { zh: "E.经典牛肉粉", en: "E.Classic Beef", km: "E.គុយទាវសាច់គោ", vi: "E.Bún bò Huế", ja: "E.定番牛肉麺", ko: "E.클래식 소고기 국수" },
+        cat: { zh: "E.經典牛肉粉", en: "E.Classic Beef", km: "E.គុយទាវសាច់គោ", vi: "E.Bún bò Huế", ja: "E.定番牛肉麺", ko: "E.클래식 소고기 국수" },
         items: [
-            { id: 501, name: { zh: "E1.经典牛肉粉", en: "E1.Classic Beef Rice Noodle", km: "E1.គុយទាវសាច់គោពិសេស", vi: "E1.Bún Bò Huế", ja: "E1.定番牛肉ライスヌードル", ko: "E1.클래식 소고기 쌀국수" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 502, name: { zh: "E2.经典牛肉面线", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò", ja: "E2.定番牛肉細米粉麺", ko: "E2.클래식 소고기 버미셀리" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 503, name: { zh: "E3.经典牛肉汤泡面", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế", ja: "E3.定番牛肉インスタント麺", ko: "E3.클래식 소고기 라면" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 504, name: { zh: "E4.经典牛肉汤泡饭", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt", ja: "E4.定番牛肉スープライス", ko: "E4.클래식 소고기 국밥" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 505, name: { zh: "E5.经典牛肉汤河粉", en: "E5.Classic Beef Soup with Flat Rice Noodles", km: "E5.គុយទាវសាច់គោពិសេសសរសៃធំ", vi: "E5.Bún bò Huế bánh phở", ja: "E5.定番牛肉スープのきしめん风ライスヌードル", ko: "E5.클래식 소고기 쌀국수(넓은면)" }, price: 3.5, img: "img/IMG_2256.PNG" },
-            { id: 506, name: { zh: "E6.经典牛肉汤粉丝", en: "E6.Classic Beef Soup with Glass Noodles", km: "E6.គុយទាវសាច់គោពិសេសសរសៃកញ្ចក់", vi: "E6.Bún bò Huế miến", ja: "E6.定番牛肉スープの春雨麺", ko: "E6.클래식 소고기 당면 국수" }, price: 4.0, img: "img/IMG_2256.PNG" },
-            EXTRA_BEEF, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
+            { id: 501, name: { zh: "E1.經典牛肉粉", en: "E1.Classic Beef Rice Noodle", km: "E1.គុយទាវសាច់គោពិសេស", vi: "E1.Bún Bò Huế", ja: "E1.定番牛肉ライスヌードル", ko: "E1.클래식 소고기 쌀국수" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 502, name: { zh: "E2.經典牛肉麵線", en: "E2.Classic Beef Vermicelli", km: "E2.នំបញ្ចុកសាច់គោ", vi: "E2.Bún sợi nhỏ bò", ja: "E2.定番牛肉細米粉麺", ko: "E2.클래식 소고기 버미셀리" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 503, name: { zh: "E3.經典牛肉湯泡麵", en: "E3.Classic Beef Instant Noodle Soup", km: "E3.មីប៊ុនបូហ្វេ", vi: "E3.Mì Bún Bò Huế", ja: "E3.定番牛肉インスタント麺", ko: "E3.클래식 소고기 라면" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 504, name: { zh: "E4.經典牛肉湯泡飯", en: "E4.Classic Beef Soup Rice", km: "E4.បាយស៊ុបសាច់គោពិសេស", vi: "E4.Cơm súp bò đặc biệt", ja: "E4.定番牛肉スープライス", ko: "E4.클래식 소고기 국밥" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 505, name: { zh: "E5.經典牛肉湯河粉", en: "E5.Classic Beef Soup with Flat Rice Noodles", km: "E5.គុយទាវសាច់គោពិសេសសរសៃធំ", vi: "E5.Bún bò Huế bánh phở", ja: "E5.定番牛肉スープのきしめん風ライスヌードル", ko: "E5.클래식 소고기 쌀국수(넓은면)" }, price: 3.5, img: "img/IMG_2256.PNG" },
+            { id: 506, name: { zh: "E6.經典牛肉湯粉絲", en: "E6.Classic Beef Soup with Glass Noodles", km: "E6.គុយទាវសាច់គោពិសេសសរសៃកញ្ចក់", vi: "E6.Bún bò Huế miến", ja: "E6.定番牛肉スープの春雨麺", ko: "E6.클래식 소고기 당면 국수" }, price: 4.0, img: "img/IMG_2256.PNG" },
+            EXTRA_BEEF, EXTRA_MEATBALL, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        cat: { zh: "F.越式蟹肉饼汤粉", en: "F.Crab Pork Cake Soup", km: "F.ស៊ុបខ្យងក្តាម", vi: "F.Bún riêu", ja: "F.カニ肉団子麺", ko: "F.게살 완탕 국수" },
+        cat: { zh: "F.越式蟹肉餅湯粉", en: "F.Crab Pork Cake Soup", km: "F.ស៊ុបខ្យងក្តាម", vi: "F.Bún riêu", ja: "F.カニ肉団子麺", ko: "F.게살 완탕 국수" },
         items: [    
-            { id: 601, name: { zh: "F1.越式蟹肉饼汤面线", en: "F1.Crab Pork Cake with Vermicelli", km: "F1.នំបញ្ចុកស៊ុបខ្យងក្តាម", vi: "F1.Bún riêu cua", ja: "F1.カニ肉団子スープの細米粉麺", ko: "F1.게살 완탕 버미셀리" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 602, name: { zh: "F2.越式蟹肉饼汤泡面", en: "F2.Crab Pork Cake with Instant Noodle", km: "F2.មីស៊ុបខ្យងក្តាម", vi: "F2.Mì riêu cua", ja: "F2.カニ肉団子スープのインスタント麺", ko: "F2.게살 완탕 라면" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 603, name: { zh: "F3.越式蟹肉饼汤泡饭", en: "F3.Crab Pork Cake Soup Rice", km: "F3.បាយស៊ុបខ្យងក្តាម", vi: "F3.Cơm riêu cua", ja: "F3.カニ肉団子スープライス", ko: "F3.게살 완탕 국밥" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 604, name: { zh: "F4.越式蟹肉饼汤河粉", en: "F4.Crab Pork Cake Flat Noodles", km: "F4.គុយទាវសរសៃធំខ្យងក្តាម", vi: "F4.Bánh phở riêu cua", ja: "F4.カニ肉団子スープのきしめん風ライスヌードル", ko: "F4.게살 완탕 쌀국수(넓은면)" }, price: 2.5, img: "img/IMG_3001.PNG" },
-            { id: 605, name: { zh: "F5.越式蟹肉饼汤粿条", en: "F5.Crab Pork Cake Khmer Noodles", km: "F5.គុយទាវស៊ុបខ្យងក្តាម", vi: "F5.Hủ tiếu riêu cua", ja: "F5.カニ肉団子スープのクメール風ヌードル", ko: "F5.게살 완탕 쌀국수" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 601, name: { zh: "F1.越式蟹肉餅湯麵線", en: "F1.Crab Pork Cake with Vermicelli", km: "F1.នំបញ្ចុកស៊ុបខ្យងក្តាម", vi: "F1.Bún riêu cua", ja: "F1.カニ肉団子スープの細米粉麺", ko: "F1.게살 완탕 버미셀리" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 602, name: { zh: "F2.越式蟹肉餅湯泡麵", en: "F2.Crab Pork Cake with Instant Noodle", km: "F2.មីស៊ុបខ្យងក្តាម", vi: "F2.Mì riêu cua", ja: "F2.カニ肉団子スープのインスタント麺", ko: "F2.게살 완탕 라면" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 603, name: { zh: "F3.越式蟹肉餅湯泡飯", en: "F3.Crab Pork Cake Soup Rice", km: "F3.បាយស៊ុបខ្យងក្តាម", vi: "F3.Cơm riêu cua", ja: "F3.カニ肉団子スープライス", ko: "F3.게살 완탕 국밥" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 604, name: { zh: "F4.越式蟹肉餅湯河粉", en: "F4.Crab Pork Cake Flat Noodles", km: "F4.គុយទាវសរសៃធំខ្យងក្តាម", vi: "F4.Bánh phở riêu cua", ja: "F4.カニ肉団子スープのきしめん風ライスヌードル", ko: "F4.게살 완탕 쌀국수(넓은면)" }, price: 2.5, img: "img/IMG_3001.PNG" },
+            { id: 605, name: { zh: "F5.越式蟹肉餅湯粿條", en: "F5.Crab Pork Cake Khmer Noodles", km: "F5.គុយទាវស៊ុបខ្យងក្តាម", vi: "F5.Hủ tiếu riêu cua", ja: "F5.カニ肉団子スープのクメール風ヌードル", ko: "F5.게살 완탕 쌀국수" }, price: 2.5, img: "img/IMG_3001.PNG" },
             EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        hidden: true, // 🚨 暂时下架隐藏，保留代码
-        cat: { zh: "G.法棍系列", en: "G.Baguette", km: "G.ប្រភេទនំបុ័ង", vi: "G.Bánh mì", ja: "G.バゲットシリーズ", ko: "G.바ゲト 시리즈" },
+        hidden: true, // 🚨 暫時下架隱藏
+        cat: { zh: "G.法棍系列", en: "G.Baguette", km: "G.ប្រភេទនំបុ័ង", vi: "G.Bánh mì", ja: "G.バゲットシリーズ", ko: "G.바게트 시리즈" },
         items: [
-            { id: 701, name: { zh: "G1.柬式红咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri", ja: "G1.レッドカレー＆バゲットセット", ko: "G1.레드카레 바ゲト 세트" }, price: 3.5, img: "img/IMG_2264.PNG" },
-            { id: 702, name: { zh: "G2.柬式米粉汤法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer", ja: "G2.クメール伝統スープ＆バゲット", ko: "G2.크메르 전통សព៌ 바ゲト" }, price: 2.5, img: "img/IMG_2257set.PNG" },
+            { id: 701, name: { zh: "G1.柬式紅咖哩法棍套餐", en: "G1.Red Curry with Baguette", km: "G1.នំបុ័ងការី", vi: "G1.Bánh mì cà ri", ja: "G1.レッドカレー＆バゲットセット", ko: "G1.레드카레 바게트 세트" }, price: 3.5, img: "img/IMG_2264.PNG" },
+            { id: 702, name: { zh: "G2.柬式米粉湯法棍", en: "G2.Nom Banh Chok with Baguette", km: "G2.នំបុ័ងនំបញ្ចុក", vi: "G2.Bánh mì súp Khmer", ja: "G2.クメール伝統スープ＆バゲット", ko: "G2.크메រ 전통 바게트" }, price: 2.5, img: "img/IMG_2257set.PNG" },
             EXTRA_BAGUETTE, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        cat: { zh: "X.饭类", en: "X.Rice Dishes", km: "X.បាយ", vi: "X.Cơm", ja: "X.ご飯もの", ko: "X.밥류" },
+        cat: { zh: "X.飯類", en: "X.Rice Dishes", km: "X.បាយ", vi: "X.Cơm", ja: "X.ご飯もの", ko: "X.밥류" },
         items: [
-            { id: 801, name: { zh: "X1.鸡腿饭+煎蛋", en: "X1.Chicken Leg Rice + Egg", km: "X1.បាយមាន់+ពងទា", vi: "X1.Cơm đùi gà + Trứng", ja: "X1.チキンレッグライス＆目玉焼き", ko: "X1.닭다리 덮밥 + 계란후라이" }, price: 3.5, img: "img/IMG_2259.PNG" },
-            { id: 802, name: { zh: "X2.双枪鸡腿饭+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng", ja: "X2.ダブルチキンレッグライス＆目玉焼き", ko: "X2.더블 닭다리 덮밥 + 계란후라이" }, price: 5.5, img: "img/IMG_2259.PNG" },
-            { id: 803, name: { zh: "X3.洋葱炒牛肉盖饭+煎蛋", en: "X3.Stir-fried Beef w/ Onion Rice + Egg", km: "X3.បាយឆាសាច់គោខ្ទឹមបារាំង+ពងទា", vi: "X3.Cơm bò xào hành tây + Trứng", ja: "X3.牛肉と玉ねぎ炒め丼＆目玉焼き", ko: "X3.양파 소고기 덮밥 + 계란후라이" }, price: 3.5, img: "img/X3.png" },
-            { id: 804, name: { zh: "X4.青椒炒牛肉盖饭+煎蛋", en: "X4.Stir-fried Beef w/ Green Pepper Rice + Egg", km: "X4.បាយឆាសាច់គោម្ទេសផ្លោក+ពងទា", vi: "X4.Cơm bò xào ớt chuông + Trứng", ja: "X4.牛肉とピーマン炒め丼＆目玉焼き", ko: "X4.피망 소고기 덮밥 + 계란후라이" }, price: 4.0, img: "img/X4.png" },
+            { id: 801, name: { zh: "X1.雞腿飯+煎蛋", en: "X1.Chicken Leg Rice + Egg", km: "X1.បាយមាន់+ពងទា", vi: "X1.Cơm đùi gà + Trứng", ja: "X1.チキンレッグライス＆目玉焼き", ko: "X1.닭다리 덮밥 + 계란후라이" }, price: 3.5, img: "img/IMG_2259.PNG" },
+            { id: 802, name: { zh: "X2.雙槍雞腿飯+煎蛋", en: "X2.Double Chicken Leg Rice + Egg", km: "X2.បាយមាន់ភ្លៅពីរ+ពងទា", vi: "X2.Cơm 2 đùi gà + Trứng", ja: "X2.ダブルチキンレッグライス＆目玉焼き", ko: "X2.더블 닭다리 덮밥 + 계란후라이" }, price: 5.5, img: "img/IMG_2259.PNG" },
+            { id: 803, name: { zh: "X3.洋蔥炒牛肉蓋飯+煎蛋", en: "X3.Stir-fried Beef w/ Onion Rice + Egg", km: "X3.បាយឆាសាច់គោខ្ទឹមបារាំង+ពងទា", vi: "X3.Cơm bò xào hành tây + Trứng", ja: "X3.牛肉と玉ねぎ炒め丼＆目玉焼き", ko: "X3.양파 소고기 덮밥 + 계란후라이" }, price: 3.5, img: "img/X3.png" },
+            { id: 804, name: { zh: "X4.青椒炒牛肉蓋飯+煎蛋", en: "X4.Stir-fried Beef w/ Green Pepper Rice + Egg", km: "X4.បាយឆាសាច់គោម្ទេសផ្លោក+ពងទា", vi: "X4.Cơm bò xào ớt chuông + Trứng", ja: "X4.牛肉とピーマン炒め丼＆目玉焼き", ko: "X4.피망 소고기 덮밥 + 계란후라이" }, price: 4.0, img: "img/X4.png" },
             SWAP_EGG, EXTRA_CHICKEN, EXTRA_EGG, EXTRA_EGG_SOFT, EXTRA_EGG_GREEN, EXTRA_PLUM, EXTRA_COFFEE, EXTRA_LEMON_TEA
         ]
     },
     {
-        cat: { zh: "Y.单点", en: "Y.Add-ons", km: "Y.បន្ថែម", vi: "Y.Thêm", ja: "Y.単品・トッピング", ko: "Y.사이드 메뉴" },
+        cat: { zh: "Y.單點", en: "Y.Add-ons", km: "Y.បន្ថែម", vi: "Y.Thêm", ja: "Y.単品・トッピング", ko: "Y.사이드 메뉴" },
         items: [
-            { id: 906, name: { zh: "Y6.牛肉", en: "Y6.Beef", km: "Y6.សាច់គោ", vi: "Y6.Thịt bò", ja: "Y6.牛肉", ko: "Y6.소고기" }, price: 1.0, img: "" },
-            { id: 901, name: { zh: "Y1.单只炸鸡腿", en: "Y1.Fried Chicken Leg", km: "Y1.ភ្លៅមាន់បំពង", vi: "Y1.Đùi gà chiên", ja: "Y1.フライドチキンレッグ(1本)", ko: "Y1.후라이드 닭다리(1개)" }, price: 2.5, img: "img/IMG_2316.PNG" },
+            { id: 906, name: { zh: "Y6.牛肉", en: "Y6.Beef", km: "Y6.សាច់គោ", vi: "Y6.Thịt bò", ja: "Y6.牛肉", ko: "Y6.소고기" }, price: 1.0, img: "img/IMG_2263.PNG" },
+            { id: 907, name: { zh: "Y8.牛肉丸", en: "Y8.Beef Meatballs", km: "Y8.ប្រហិតសាច់គោ", vi: "Y8.Bò viên", ja: "Y8.牛肉団子", ko: "Y8.소고기 완자" }, price: 1.0, img: "img/NO.png" },
+            { id: 901, name: { zh: "Y1.單隻炸雞腿", en: "Y1.Fried Chicken Leg", km: "Y1.ភ្លៅមាន់បំពង", vi: "Y1.Đùi gà chiên", ja: "Y1.フライドチキンレッグ(1本)", ko: "Y1.후라이드 닭다리(1개)" }, price: 2.5, img: "img/IMG_2316.PNG" },
             { id: 902, name: { zh: "Y2.煎蛋(全熟)", en: "Y2.Fried Egg (Well Done)", km: "Y2.ពងទាចៀន (ឆ្អិន)", vi: "Y2.Trứng chiên (Chín kỹ)", ja: "Y2.目玉焼き(良く焼き)", ko: "Y2.계란후라이(완숙)" }, price: 0.6, img: "img/EGG.PNG" },
-            { id: 903, name: { zh: "Y4.煎蛋(不熟)", en: "Y4.Fried Egg (Over Easy)", km: "Y4.ពងទាចៀន (ជ័រភ្នៅ)", vi: "Y4.Trứng chiên (Lòng đào)", ja: "Y4.目玉焼き(半熟)", ko: "Y4.계란후라이(반숙)" }, price: 0.6, img: "img/EGG.PNG" },
-            { id: 904, name: { zh: "Y5.葱蛋", en: "Y5.Scallion Omelet", km: "Y5.ពងទាចៀនស្លឹកខ្ទឹម", vi: "Y5.Trứng chiên hành", ja: "Y5.ネギ入り卵焼き", ko: "Y5.파계란말이" }, price: 0.6, img: "img/segg.png" },
-            { id: 905, name: { zh: "Y3.越南短法棍(2个)", en: "Y3.Short Baguette (2 pcs)", km: "Y3.នំបុ័ង (2)", vi: "Y3.Bánh mì ngắn (2 cái)", ja: "Y3.ミニバゲット(2個)", ko: "Y3.미ニ 바ゲト(2개)" }, price: 0.5, img: "img/IMG_2583.PNG" },
-            { id: 1010, name: { zh: "Y7.酸梅汤", en: "Y7.Plum Juice", km: "Y7.ទឹកផ្លែជូរ", vi: "Y7.Nước xí muội", ja: "Y7.梅ジュース", ko: "Y7.매실차" }, price: 1.0, img: "img/PLUM.png" }
+            { id: 903, name: { zh: "Y4.煎蛋(半熟)", en: "Y4.Fried Egg (Over Easy)", km: "Y4.ពងទាចៀន (ជ័រភ្នៅ)", vi: "Y4.Trứng chiên (Lòng đào)", ja: "Y4.目玉焼き(半熟)", ko: "Y4.계란후라이(반숙)" }, price: 0.6, img: "img/EGG.PNG" },
+            { id: 904, name: { zh: "Y5.蔥蛋", en: "Y5.Scallion Omelet", km: "Y5.ពងទាចៀនស្លឹកខ្ទឹម", vi: "Y5.Trứng chiên hành", ja: "Y5.ネギ入り卵焼き", ko: "Y5.파계란말이" }, price: 0.6, img: "img/segg.png" },
+            { id: 905, name: { zh: "Y3.越南短法棍(2個)", en: "Y3.Short Baguette (2 pcs)", km: "Y3.នំបុ័ង (2)", vi: "Y3.Bánh mì ngắn (2 cái)", ja: "Y3.ミニバゲット(2個)", ko: "Y3.미니 바게토(2개)" }, price: 0.5, img: "img/IMG_2583.PNG" },
+            { id: 1010, name: { zh: "Y7.酸梅湯", en: "Y7.Plum Juice", km: "Y7.ទឹកផ្លែជូរ", vi: "Y7.Nước xí muội", ja: "Y7.梅ジュース", ko: "Y7.매실차" }, price: 1.0, img: "img/PLUM.png" }
         ]
     },
     {
-        cat: { zh: "Z.饮料", en: "Z.Drinks", km: "Z.ភេសជ្ជៈ", vi: "Z.Đồ uống", ja: "Z.ドリンク", ko: "Z.음료수" },
+        cat: { zh: "Z.飲料", en: "Z.Drinks", km: "Z.ភេសជ្ជៈ", vi: "Z.Đồ uống", ja: "Z.ドリンク", ko: "Z.음료수" },
         items: [
-            { id: 1010, name: { zh: "Z8.酸梅汤", en: "Z8.Plum Juice", km: "Z8.ទឹកផ្លែជូរ", vi: "Z8.Nước xí muội", ja: "Z8.梅ジュース", ko: "Z8.매실차" }, price: 1, img: "img/PLUM.png" },
-            { id: 1001, name: { zh: "Z1.越南炼乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá", ja: "Z1.ベトナムミルクコーヒー", ko: "Z1.베트남 연유커피" }, price: 1, img: "img/MILKCOFEE.png" },
-            { id: 1008, name: { zh: "Z1.5.越南炼乳咖啡(小)", en: "Z1.5.VN Coffee w/ Milk (Small)", km: "Z1.5.កាហ្វេទឹកដោះគោ (តូច)", vi: "Z1.5.Cà phê sữa đá (Nhỏ)", ja: "Z1.5.ベトナムミルクコーヒー(小)", ko: "Z1.5.베트남 연유커피(소)" }, price: 0.75, img: "img/MILKCOFEE.png" },
+            { id: 1010, name: { zh: "Z8.酸梅湯", en: "Z8.Plum Juice", km: "Z8.ទឹកផ្លែជូរ", vi: "Z8.Nước xí muội", ja: "Z8.梅ジュース", ko: "Z8.매실차" }, price: 1, img: "img/PLUM.png" },
+            { id: 1001, name: { zh: "Z1.越南煉乳咖啡", en: "Z1.VN Coffee w/ Milk", km: "Z1.កាហ្វេទឹកដោះគោ", vi: "Z1.Cà phê sữa đá", ja: "Z1.ベトナムミルクコーヒー", ko: "Z1.베트남 연유커피" }, price: 1, img: "img/MILKCOFEE.png" },
+            { id: 1008, name: { zh: "Z1.5.越南煉乳咖啡(小)", en: "Z1.5.VN Coffee w/ Milk (Small)", km: "Z1.5.កាហ្វេទឹកដោះគោ (តូច)", vi: "Z1.5.Cà phê sữa đá (Nhỏ)", ja: "Z1.5.ベトナムミルクコーヒー(小)", ko: "Z1.5.베트남 연유커피(소)" }, price: 0.75, img: "img/MILKCOFEE.png" },
             { id: 1002, name: { zh: "Z2.越南黑咖啡", en: "Z2.VN Black Coffee", km: "Z2.កាហ្វេខ្មៅ", vi: "Z2.Cà phê đen", ja: "Z2.ベトナムブラックコーヒー", ko: "Z2.베트남 블랙커피" }, price: 0.75, img: "img/BLOCKCOFFEE.png" },
             { id: 1009, name: { zh: "Z2.5.越南黑咖啡(小)", en: "Z2.5.VN Black Coffee (Small)", km: "Z2.5.កាហ្វេខ្មៅ (តូច)", vi: "Z2.5.Cà phê đen (Nhỏ)", ja: "Z2.5.ベトナムブラックコーヒー(小)", ko: "Z2.5.베트남 블랙커피(소)" }, price: 0.5, img: "img/BLOCKCOFFEE.png" },
-            { id: 1003, name: { zh: "Z3.柠檬茶", en: "Z3.Lemon Tea", km: "Z3.តែក្រូចឆ្មា", vi: "Z3.Trà chanh", ja: "Z3.レモンティー", ko: "Z3.레몬티" }, price: 1, img: "img/LEMON_TEA.png" },
-            { id: 1004, name: { zh: "Z4.可乐", en: "Z4.Coke", km: "Z4.កូកាឡា", vi: "Z4.Coca Cola", ja: "Z4.コーラ", ko: "Z4.콜라" }, price: 1, img: "img/COKE.png" },
-            { id: 1005, name: { zh: "Z5.卡拉宝", en: "Z5.Carabao", km: "Z5.Carabao", vi: "Z5.Carabao", ja: "Z5.カラバオ", ko: "Z5.카라바오" }, price: 1, img: "img/CARABAO.png" },
+            { id: 1003, name: { zh: "Z3.檸檬茶", en: "Z3.Lemon Tea", km: "Z3.តែក្រូចឆ្មា", vi: "Z3.Trà chanh", ja: "Z3.レモンティー", ko: "Z3.레몬티" }, price: 1, img: "img/LEMON_TEA.png" },
+            { id: 1004, name: { zh: "Z4.可樂", en: "Z4.Coke", km: "Z4.កូកាឡា", vi: "Z4.Coca Cola", ja: "Z4.コーラ", ko: "Z4.콜라" }, price: 1, img: "img/COKE.png" },
+            { id: 1005, name: { zh: "Z5.卡拉寶", en: "Z5.Carabao", km: "Z5.Carabao", vi: "Z5.Carabao", ja: "Z5.カラバオ", ko: "Z5.카라바오" }, price: 1, img: "img/CARABAO.png" },
             { id: 1006, name: { zh: "Z6.Sting", en: "Z6.Sting", km: "Z6.Sting", vi: "Z6.Sting", ja: "Z6.スティング", ko: "Z6.스팅" }, price: 1, img: "img/STING.png" },
-            { id: 1007, name: { zh: "Z7.瓶装水", en: "Z7.Water", km: "Z7.ទឹកបរិសុទ្ធ", vi: "Z7.Nước suối", ja: "Z7.ミネラルウォーター", ko: "Z7.생수" }, price: 0.5, img: "img/HITECH.png" }
+            { id: 1007, name: { zh: "Z7.瓶裝水", en: "Z7.Water", km: "Z7.ទឹកបរិសុទ្ធ", vi: "Z7.Nước suối", ja: "Z7.ミネラルウォーター", ko: "Z7.생수" }, price: 0.5, img: "img/HITECH.png" }
         ]
     }
 ];
+
+// 全域物品字典，便於快速查品名與價格
+const itemDict = {};
+menuData.forEach(cat => {
+    cat.items.forEach(it => {
+        if (!itemDict[it.id]) itemDict[it.id] = it;
+    });
+});
 
 function isOpening() {
     if (IS_CLOSED_TODAY) return false; 
@@ -350,17 +718,98 @@ function isOpening() {
     return hour >= OPEN_HOUR && hour < CLOSE_HOUR;
 }
 
+function updateTableBanner() {
+    const banner = document.getElementById('table-banner');
+    const bannerText = document.getElementById('table-banner-text');
+    const badge = document.getElementById('table-mode-badge');
+    
+    banner.classList.remove('error');
+
+    const validTables = ["1", "2", "3", "4", "5", "out", "room", "app", "tg"];
+    if (!validTables.includes(tableNo)) {
+        banner.classList.add('error');
+        bannerText.innerText = i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.zh;
+        badge.innerText = "";
+        return;
+    }
+
+    const modeLabels = {
+        zh: { table: "內用", room: "公寓外送", out: "外帶自取", app: "外賣平台", tg: "Telegram 點餐" },
+        en: { table: "Dine-in", room: "Apartment Delivery", out: "Takeout", app: "Delivery App", tg: "Telegram Order" },
+        km: { table: "ញ៉ាំនៅហាង", room: "ដឹកជញ្ជូនខុនដូ", out: "វេចខ្ចប់", app: "ដឹកជញ្ជូនតាម App", tg: "កុម្មង់តាម Telegram" },
+        vi: { table: "Ăn tại quán", room: "Giao chung cư", out: "Mang về", app: "App giao hàng", tg: "Đặt qua Telegram" },
+        ja: { table: "店内飲食", room: "マンション配送", out: "テイクアウト", app: "デリバリーアプリ", tg: "Telegram 注文" },
+        ko: { table: "매장 식사", room: "아파트 배달", out: "포장", app: "배달 앱", tg: "Telegram 주문" }
+    };
+    const curModes = modeLabels[currentLang] || modeLabels.zh;
+
+    if (tableNo === 'tg') {
+        const userName = tgUser ? `${tgUser.first_name}` : "";
+        bannerText.innerText = `🤖 ${curModes.tg}` + (userName ? ` (👋 歡迎 ${userName})` : "");
+        badge.innerText = "Mini App";
+    } else if (tableNo === 'room') {
+        const savedRoom = localStorage.getItem('pholinlin_room_no') || "";
+        bannerText.innerText = `🏢 ${curModes.room}` + (savedRoom ? ` (房號: ${savedRoom})` : "");
+        badge.innerText = `運費: $${DELIVERY_FEE.toFixed(2)}`;
+    } else if (tableNo === 'app') {
+        bannerText.innerText = `🛵 ${curModes.app}`;
+        badge.innerText = "Grab / Wownow / Egets / Panda / PassApp";
+    } else if (tableNo === 'out') {
+        bannerText.innerText = `🥡 ${curModes.out}`;
+        badge.innerText = "Takeout";
+    } else {
+        const tableLabel = { zh: "桌號", en: "Table", km: "តុ", vi: "Bàn", ja: "テーブル", ko: "테이블" };
+        bannerText.innerText = `🪑 ${curModes.table}：${tableNo} 號桌 (${tableLabel[currentLang] || tableLabel.zh}: ${tableNo})`;
+        badge.innerText = "";
+    }
+}
+
+function checkStatusDone() {
+    if (urlStatus === 'done') {
+        const banner = document.getElementById('success-banner');
+        banner.innerText = i18nMsgs.success[currentLang] || i18nMsgs.success.zh;
+        banner.style.display = 'block';
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 8000);
+    }
+}
+
 function render() {
+    // 1. 更新語言選中按鈕樣式
+    ['zh', 'en', 'km', 'vi', 'ja', 'ko'].forEach(lang => {
+        const btn = document.getElementById(`lang-${lang}`);
+        if (btn) {
+            btn.className = (lang === currentLang) ? 'active' : '';
+        }
+    });
+
+    // 2. 備註欄 Placeholder 多語言化
+    const noteInput = document.getElementById('order-note');
+    if (noteInput) {
+        noteInput.placeholder = i18nMsgs.notePlaceholder[currentLang] || i18nMsgs.notePlaceholder.zh;
+    }
+
+    // 3. 購物車文字多語言化
+    const cartViewText = document.getElementById('cart-view-text');
+    if (cartViewText) cartViewText.innerText = i18nMsgs.cartDetails[currentLang] || i18nMsgs.cartDetails.zh;
+    const cartModalTitle = document.getElementById('cart-modal-title');
+    if (cartModalTitle) cartModalTitle.innerText = i18nMsgs.cartTitle[currentLang] || i18nMsgs.cartTitle.zh;
+    const cartClearText = document.getElementById('cart-clear-text');
+    if (cartClearText) cartClearText.innerText = i18nMsgs.clearCart[currentLang] || i18nMsgs.clearCart.zh;
+
+    updateTableBanner();
+
     const sidebar = document.getElementById('sidebar');
     
-    // 如果初始选中的分类被隐藏，自动切换到第一个未隐藏的分类
+    // 如果初始選中的分類被隱藏，自動切換到第一個未隱藏的分類
     if (menuData[currentCatIndex] && menuData[currentCatIndex].hidden) {
         const firstVisibleIndex = menuData.findIndex(d => !d.hidden);
         currentCatIndex = firstVisibleIndex !== -1 ? firstVisibleIndex : 0;
     }
 
     sidebar.innerHTML = menuData.map((data, index) => {
-        if (data.hidden) return ''; // 隐藏下架分类的 SideBar Tab
+        if (data.hidden) return ''; 
         return `
             <div class="tab ${index === currentCatIndex ? 'active' : ''}" onclick="switchCat(${index})">
                 ${data.cat[currentLang] || data.cat.zh}
@@ -374,12 +823,14 @@ function render() {
     const container = document.getElementById('items-container');
     container.innerHTML = menuData[currentCatIndex].items.map(item => {
         const count = cart[item.id] || 0;
+        const itemName = item.name[currentLang] || item.name.zh;
         return `
             <div class="card">
-                <img class="item-img" src="${item.img}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                <img class="item-img" src="${item.img || 'img/NO.png'}" loading="lazy" onerror="this.src='img/NO.png'">
                 <div class="info">
-                    <span class="name">${item.name[currentLang] || item.name.zh}</span>
-                    <span class="price">$${item.price}</span>
+                    ${item.isSwap ? `<span class="badge-special">🔥 特別加購</span>` : ''}
+                    <span class="name">${itemName}</span>
+                    <span class="price">$${item.price.toFixed(2)}</span>
                 </div>
                 <div class="stepper">
                     ${count > 0 ? `<button class="btn-step" onclick="updateCart(${item.id}, -1)">-</button>` : ''}
@@ -389,52 +840,53 @@ function render() {
             </div>
         `;
     }).join('');
+
     updateSummary();
 }
 
 function updateCart(itemId, delta) {
     if (IS_CLOSED_TODAY) { alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.emergencyClosed.zh); return; }
-    // 🚨 针对公寓用户在试图点菜或加菜时进行外送开关拦截
     if (tableNo === 'room' && !IS_DELIVERY_ENABLED) { alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh); return; }
 
     const currentCount = cart[itemId] || 0;
-    if (delta > 0 && currentCount >= 5) { alert(currentLang === 'zh' ? "每款限购5份" : "Limit 5 per item"); return; }
+    if (delta > 0 && currentCount >= 5) { 
+        alert(i18nMsgs.limit5[currentLang] || i18nMsgs.limit5.zh); 
+        return; 
+    }
 
-    // 🔒【煎蛋换葱蛋 数量限制】不能超过饭类(801~804)的总数量
+    // 🔒【煎蛋換蔥蛋 數量限制】不能超過飯類(801~804)的總數量
     if (itemId === 908 && delta > 0) {
         const totalRice = (cart[801] || 0) + (cart[802] || 0) + (cart[803] || 0) + (cart[804] || 0);
         if (currentCount >= totalRice) {
-            alert(currentLang === 'zh' ? `⚠️ 换葱蛋数量不能超过饭类总数！(当前已点 ${totalRice} 份饭)` : `⚠️ Swap count cannot exceed total rice dishes! (${totalRice} ordered)`);
+            alert(currentLang === 'zh' ? `⚠️ 換蔥蛋數量不能超過飯類總數！(目前已點 ${totalRice} 份飯)` : `⚠️ Swap count cannot exceed total rice dishes! (${totalRice} ordered)`);
             return;
         }
     }
 
     cart[itemId] = currentCount + delta;
 
-    // 🔒【回扣逻辑】若减少饭类导致换蛋数溢出，自动把换蛋数扣回
+    // 🔒【回扣邏輯】若減少飯類導致換蛋數溢出，自動把換蛋數扣回
     const newTotalRice = (cart[801] || 0) + (cart[802] || 0) + (cart[803] || 0) + (cart[804] || 0);
     if ((cart[908] || 0) > newTotalRice) { cart[908] = newTotalRice; }
 
     if (cart[itemId] <= 0) delete cart[itemId];
     render();
+    renderCartModal();
 }
 
 function updateSummary() {
     let totalQty = 0;
     let totalPrice = 0;
     
-    const processedCheck = new Set();
-    menuData.forEach(cat => {
-        cat.items.forEach(item => {
-            if (cart[item.id] && !processedCheck.has(item.id)) {
-                processedCheck.add(item.id);
-                totalQty += cart[item.id];
-                totalPrice += cart[item.id] * item.price;
-            }
-        });
+    Object.keys(cart).forEach(id => {
+        const it = itemDict[id];
+        if (it) {
+            totalQty += cart[id];
+            totalPrice += cart[id] * it.price;
+        }
     });
 
-    const labels = { zh: "合计", en: "Total", km: "សរុប", vi: "Tổng", ja: "合計", ko: "합계" };
+    const labels = { zh: "合計", en: "Total", km: "សរុប", vi: "Tổng", ja: "合計", ko: "합계" };
     document.getElementById('cart-count').innerText = `${labels[currentLang] || labels.zh}: ${totalQty} 份`;
     document.getElementById('cart-total').innerText = `$${totalPrice.toFixed(2)}`;
     
@@ -445,7 +897,7 @@ function updateSummary() {
     const timeRange = `${formatH(OPEN_HOUR)}:00 - ${formatH(CLOSE_HOUR)}:00`;
 
     if (IS_CLOSED_TODAY) {
-        const closedBtnTexts = { zh: "老板休假无法外送", en: "Closed Today", km: "ហាងសម្រាកថ្ងៃនេះ", vi: "Hôm nay quán nghỉ", ja: "本日休業", ko: "오늘 휴무" };
+        const closedBtnTexts = { zh: "老闆休假無法外送", en: "Closed Today", km: "ហាងសម្រាកថ្ងៃនេះ", vi: "Hôm nay quán nghỉ", ja: "本日休業", ko: "오늘 휴무" };
         btn.innerText = closedBtnTexts[currentLang] || closedBtnTexts.zh;
         btn.disabled = true;
         closedInfo.innerText = i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.emergencyClosed.zh;
@@ -454,129 +906,259 @@ function updateSummary() {
         const closedBtnTexts = { zh: "休息中 (Closed)", en: "Closed Now", km: "បិទឥឡូវនេះ", vi: "Hiện đang đóng cửa", ja: "準備中", ko: "영업 종료" };
         btn.innerText = closedBtnTexts[currentLang] || closedBtnTexts.zh;
         btn.disabled = true;
-        const opLabels = { zh: "营业时间", en: "Hours", km: "ម៉ោងលក់ដូរ", vi: "Giờ mở cửa", ja: "営業時間", ko: "영업시간" };
+        const opLabels = { zh: "營業時間", en: "Hours", km: "ម៉ោងលក់ដូរ", vi: "Giờ mở cửa", ja: "営業時間", ko: "영업시간" };
         closedInfo.innerText = `${opLabels[currentLang] || opLabels.zh}: ${timeRange}`;
         closedInfo.style.color = "#ff5722";
     } else if (tableNo === 'room' && !IS_DELIVERY_ENABLED) {
-        // 🚨 如果是公寓住户，且外送开关关闭，底部按钮和提示语同步变为外送打烊引导状态
-        const noDeliveryBtnTexts = { zh: "今日无法外送", en: "No Delivery", km: "មិនមានសេវាដឹកទេ", vi: "Hôm nay không ship", ja: "本日配達不可", ko: "오늘 배달 불가" };
+        const noDeliveryBtnTexts = { zh: "今日無法外送", en: "No Delivery", km: "មិនមានសេវាដឹកទេ", vi: "Hôm nay không ship", ja: "本日配達不可", ko: "오늘 배달 불가" };
         btn.innerText = noDeliveryBtnTexts[currentLang] || noDeliveryBtnTexts.zh;
         btn.disabled = true;
         closedInfo.innerText = i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh;
         closedInfo.style.color = "#ff5722";
     } else {
-        const btnTexts = { zh: "点好了，发送订单", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng ngay", ja: "注文を送信する", ko: "주문하기" };
-        btn.innerText = isSubmitting ? "正在发送..." : (btnTexts[currentLang] || btnTexts.zh);
+        const btnTexts = { zh: "點好了，發送訂單", en: "Send Order", km: "បញ្ជាទិញឥឡូវនេះ", vi: "Đặt hàng ngay", ja: "注文を送信する", ko: "주문하기" };
+        btn.innerText = isSubmitting ? "正在發送..." : (btnTexts[currentLang] || btnTexts.zh);
         btn.disabled = totalQty === 0 || isSubmitting;
-        const opLabels = { zh: "营业时间", en: "Hours", km: "ម៉ោងលក់ដូរ", vi: "Giờ mở cửa", ja: "営業時間", ko: "영업시간" };
+        const opLabels = { zh: "營業時間", en: "Hours", km: "ម៉ោងលក់ដូរ", vi: "Giờ mở cửa", ja: "営業時間", ko: "영업시간" };
         closedInfo.innerText = `${opLabels[currentLang] || opLabels.zh}: ${timeRange}`;
         closedInfo.style.color = "#777";
     }
     closedInfo.style.display = 'block';
 }
 
-async function sendToTelegram() {
-    const validTables = ["1", "2", "3", "4", "5", "out", "room", "app"];
+// --- 購物車彈窗功能 ---
+function openCartModal() {
+    renderCartModal();
+    document.getElementById('cart-modal').style.display = 'flex';
+}
+
+function closeCartModal(e) {
+    if (e && e.target !== e.currentTarget && e.target.className !== 'modal-close') return;
+    document.getElementById('cart-modal').style.display = 'none';
+}
+
+function clearCart() {
+    if (Object.keys(cart).length === 0) return;
+    const confirmMsg = currentLang === 'zh' ? "確定要清空已選餐點嗎？" : "Clear all selected items?";
+    if (confirm(confirmMsg)) {
+        cart = {};
+        render();
+        renderCartModal();
+        closeCartModal();
+    }
+}
+
+function renderCartModal() {
+    const container = document.getElementById('cart-modal-items');
+    const itemIds = Object.keys(cart);
+    let total = 0;
+
+    if (itemIds.length === 0) {
+        const emptyMsg = currentLang === 'zh' ? "購物車是空的，快去選購美味餐點吧！" : "Your cart is empty!";
+        container.innerHTML = `<div style="text-align:center; padding:30px 0; color:#999;">${emptyMsg}</div>`;
+        document.getElementById('cart-modal-total').innerText = "$0.00";
+        return;
+    }
+
+    container.innerHTML = itemIds.map(id => {
+        const item = itemDict[id];
+        if (!item) return '';
+        const qty = cart[id];
+        const sub = qty * item.price;
+        total += sub;
+        const name = item.name[currentLang] || item.name.zh;
+        return `
+            <div class="cart-item-row">
+                <div class="cart-item-name">${name}</div>
+                <div class="cart-item-price">$${sub.toFixed(2)}</div>
+                <div class="stepper">
+                    <button class="btn-step" onclick="updateCart(${item.id}, -1)">-</button>
+                    <span class="count">${qty}</span>
+                    <button class="btn-step add" onclick="updateCart(${item.id}, 1)">+</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('cart-modal-total').innerText = `$${total.toFixed(2)}`;
+}
+
+// --- 訂單流程主邏輯 ---
+function startOrderProcess() {
+    const validTables = ["1", "2", "3", "4", "5", "out", "room", "app", "tg"];
     if (!validTables.includes(tableNo)) { alert(i18nMsgs.invalidTable[currentLang] || i18nMsgs.invalidTable.en); return; }
     if (IS_CLOSED_TODAY || !isOpening()) { alert(i18nMsgs.emergencyClosed[currentLang] || i18nMsgs.closed[currentLang]); return; }
     if (tableNo === 'room' && !IS_DELIVERY_ENABLED) { alert(i18nMsgs.deliveryDisabled[currentLang] || i18nMsgs.deliveryDisabled.zh); return; }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); 
+    // 公寓外送時段與金額檢查
+    if (tableNo === 'room') {
+        const now = new Date();
+        const hour = now.getHours();
+        if (hour < ROOM_DELIVERY_START || hour >= ROOM_DELIVERY_END) {
+            alert(i18nMsgs.roomTimeErr[currentLang] || i18nMsgs.roomTimeErr.en);
+            return;
+        }
 
-    try {
-        let subTotalForCheck = 0;
-        const checkDuplicate = new Set();
-        menuData.forEach(cat => {
-            cat.items.forEach(item => {
-                if (cart[item.id] && !checkDuplicate.has(item.id)) {
-                    checkDuplicate.add(item.id);
-                    subTotalForCheck += cart[item.id] * item.price;
-                }
-            });
+        let subTotalCheck = 0;
+        Object.keys(cart).forEach(id => {
+            const it = itemDict[id];
+            if (it) subTotalCheck += cart[id] * it.price;
         });
 
+        if (subTotalCheck < MIN_ROOM_AMOUNT) {
+            alert(i18nMsgs.minAmountErr[currentLang] || i18nMsgs.minAmountErr.en);
+            return;
+        }
+
+        // 彈出房號輸入對話框
+        showRoomPrompt();
+        return;
+    }
+
+    // 外賣平台選擇
+    if (tableNo === 'app') {
+        showPlatformPicker();
+        return;
+    }
+
+    // 一般內用或外帶
+    executeSubmitOrder();
+}
+
+function showRoomPrompt() {
+    const modal = document.getElementById('custom-modal');
+    const content = document.getElementById('custom-modal-content');
+    const savedRoom = localStorage.getItem('pholinlin_room_no') || "";
+
+    const title = i18nMsgs.inputRoomTitle[currentLang] || i18nMsgs.inputRoomTitle.zh;
+    const confirmText = currentLang === 'zh' ? "確認下單" : "Confirm Order";
+    const cancelText = currentLang === 'zh' ? "取消" : "Cancel";
+
+    content.innerHTML = `
+        <h3 style="margin-top:0; font-size:16px;">🏢 公寓外送資訊</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">${title}</p>
+        <input type="text" id="modal-room-input" value="${savedRoom}" placeholder="例如: 802 / Room 802" 
+               style="width:100%; padding:10px; font-size:16px; border:1px solid #ddd; border-radius:8px; text-align:center; outline:none; margin-bottom:18px;">
+        <div style="display:flex; gap:10px;">
+            <button onclick="closeCustomModal()" style="flex:1; padding:10px; border:1px solid #ccc; background:#fff; border-radius:8px; font-size:14px; cursor:pointer;">${cancelText}</button>
+            <button onclick="submitRoomOrder()" style="flex:1; padding:10px; border:none; background:#ff5722; color:#fff; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">${confirmText}</button>
+        </div>
+    `;
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        const inp = document.getElementById('modal-room-input');
+        if (inp) inp.focus();
+    }, 100);
+}
+
+function submitRoomOrder() {
+    const inp = document.getElementById('modal-room-input');
+    const val = inp ? inp.value.trim() : "";
+    if (!val) {
+        alert(currentLang === 'zh' ? "⚠️ 房號不能為空！" : "⚠️ Room number cannot be empty!");
+        return;
+    }
+    localStorage.setItem('pholinlin_room_no', val);
+    closeCustomModal();
+    executeSubmitOrder({ roomInfo: val });
+}
+
+function showPlatformPicker() {
+    const modal = document.getElementById('custom-modal');
+    const content = document.getElementById('custom-modal-content');
+    
+    content.innerHTML = `
+        <h3 style="margin-top:0; font-size:16px;">🛵 選擇外賣平台</h3>
+        <p style="font-size:13px; color:#666;">請點選本訂單對應的外賣平台：</p>
+        <div class="platform-btn-grid">
+            <button class="platform-btn" onclick="selectPlatform('Grab')">1. Grab</button>
+            <button class="platform-btn" onclick="selectPlatform('Wownow')">2. Wownow</button>
+            <button class="platform-btn" onclick="selectPlatform('Egets')">3. Egets</button>
+            <button class="platform-btn" onclick="selectPlatform('Foodpanda')">4. Foodpanda</button>
+            <button class="platform-btn" style="grid-column: span 2; background:#fff8e1; border-color:#ffe082;" onclick="selectPlatform('PassApp')">5. PassApp</button>
+        </div>
+        <button onclick="closeCustomModal()" style="margin-top:15px; width:100%; padding:9px; border:1px solid #ddd; background:#fff; border-radius:8px; cursor:pointer;">取消</button>
+    `;
+    modal.style.display = 'flex';
+}
+
+function selectPlatform(name) {
+    closeCustomModal();
+    executeSubmitOrder({ platform: name });
+}
+
+function closeCustomModal() {
+    document.getElementById('custom-modal').style.display = 'none';
+}
+
+async function executeSubmitOrder(extraParams = {}) {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    updateSummary();
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); 
+
+    try {
+        const roomInfo = extraParams.roomInfo || localStorage.getItem('pholinlin_room_no') || "";
+        const selectedPlatform = extraParams.platform || "";
+        const customerNote = (document.getElementById('order-note')?.value || "").trim();
+
+        // 判斷訂單來源與細節（給試算表專用）
+        let orderType = "內用";
+        let orderTarget = `${tableNo} 號桌`;
+
         if (tableNo === 'room') {
-            const now = new Date();
-            const hour = now.getHours();
-            if (hour < ROOM_DELIVERY_START || hour >= ROOM_DELIVERY_END) {
-                alert(i18nMsgs.roomTimeErr[currentLang] || i18nMsgs.roomTimeErr.en);
-                return;
-            }
-            if (subTotalForCheck < MIN_ROOM_AMOUNT) {
-                alert(i18nMsgs.minAmountErr[currentLang] || i18nMsgs.minAmountErr.en);
-                return;
-            }
+            orderType = "公寓外送";
+            orderTarget = `房號 ${roomInfo}`;
+        } else if (tableNo === 'app') {
+            orderType = "外賣平台";
+            orderTarget = selectedPlatform;
+        } else if (tableNo === 'out') {
+            orderType = "外帶打包";
+            orderTarget = "打包自取";
+        } else if (tableNo === 'tg') {
+            orderType = "Telegram小程式";
+            orderTarget = tgUser ? `@${tgUser.username || tgUser.first_name}` : "TG用戶";
         }
 
-        let roomInfo = "";
-        if (tableNo === 'room') {
-            const savedRoom = localStorage.getItem('pholinlin_room_no') || "";
-            const promptMsg = savedRoom 
-                ? (currentLang === 'zh' ? `上次房号: [ ${savedRoom} ]\n如需更改请输入新房号，或直接点击确定使用原房号：` : `Last room: [ ${savedRoom} ]\nEnter new room or click OK to keep:`)
-                : (i18nMsgs.inputRoom[currentLang] || i18nMsgs.inputRoom.en);
+        let tgDisplayName = tgUser ? `${tgUser.first_name} (@${tgUser.username || '無'})` : "TG用戶";
+        let displayTable = (tableNo === 'room') ? `🏢 房間 / Phòng: ${roomInfo}` : 
+                           (tableNo === 'app') ? `🛵 外賣平台 / App: ${selectedPlatform}` :
+                           (tableNo === 'out') ? "🥡 打包 / Mang về" : 
+                           (tableNo === 'tg') ? `🤖 Telegram: ${tgDisplayName}` :
+                           `🪑 桌號 / Bàn: ${tableNo}`;
 
-            let inputRoom = prompt(promptMsg, savedRoom);
-            if (inputRoom === null) return;
-            
-            roomInfo = inputRoom.trim() ? inputRoom.trim() : savedRoom;
-            if (!roomInfo) {
-                alert(currentLang === 'zh' ? "⚠️ 房号不能为空！" : "⚠️ Room number cannot be empty!");
-                return;
-            }
-            localStorage.setItem('pholinlin_room_no', roomInfo);
-        }
-
-        let selectedPlatform = "";
-        if (tableNo === 'app') {
-            const platformInput = prompt("请选择外卖平台 / Select Delivery App:\n1: Grab\n2: Wownow\n3: Egets\n4: Foodpanda\n(请输入数字 1-4 / Enter 1-4)");
-            if (!platformInput) return;
-            const pMap = { "1": "Grab", "2": "Wownow", "3": "Egets", "4": "Foodpanda" };
-            selectedPlatform = pMap[platformInput.trim()];
-            if (!selectedPlatform) { alert("⚠️ 无效选择 / Invalid selection"); return; }
-        }
-
-        if (isSubmitting) return;
-        isSubmitting = true;
-        updateSummary();
-
-        let displayTable = (tableNo === 'room') ? `🏢 房间 / Phòng: ${roomInfo}` : 
-                           (tableNo === 'app') ? `🛵 外卖平台 / App: ${selectedPlatform}` :
-                           (tableNo === 'out') ? "🥡 打包 / Mang về" : `🪑 桌号 / Bàn: ${tableNo}`;
-
-        let message = `📍 ${displayTable}\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 New Order!\n--------------------------\n`;
+        let message = (tgUser ? `👤 訂購人: ${tgDisplayName}\n` : "") + 
+                      `📍 ${displayTable}\n⏰ Time: ${new Date().toLocaleTimeString()}\n🔔 New Order!\n--------------------------\n`;
         
         let subTotal = 0;
         let foodQty = 0;
         let drinkQty = 0;
-        const processedIds = new Set(); 
+        const summaryList = [];
 
-        menuData.forEach(cat => {
-            cat.items.forEach(item => {
-                if (cart[item.id] && !processedIds.has(item.id)) {
-                    processedIds.add(item.id);
-                    const qty = cart[item.id];
-                    const itemTotal = qty * item.price;
+        Object.keys(cart).forEach(id => {
+            const item = itemDict[id];
+            if (!item) return;
+            const qty = cart[id];
+            const itemTotal = qty * item.price;
 
-                    // 🧹 1. 过滤 HTML 标签，避免标签传到 Telegram
-                    const cleanNameVi = item.name.vi.replace(/<[^>]*>/g, '');
-                    const cleanNameZh = item.name.zh.replace(/<[^>]*>/g, '');
+            const cleanNameVi = item.name.vi ? item.name.vi.replace(/<[^>]*>/g, '') : item.name.zh;
+            const cleanNameZh = item.name.zh.replace(/<[^>]*>/g, '');
 
-                    message += `▪️ ${cleanNameVi} (${cleanNameZh})\n   SL: ${qty}\n\n`;
-                    subTotal += itemTotal;
+            message += `▪️ ${cleanNameVi} (${cleanNameZh})\n   SL: ${qty}\n\n`;
+            summaryList.push(`${cleanNameZh} x${qty}`);
+            subTotal += itemTotal;
 
-                    // 🍲 2. 排除 ID 908 (煎蛋换葱蛋)，不计入餐点份数
-                    if (item.id >= 1000) {
-                        drinkQty += qty;
-                    } else if (item.id !== 908) {
-                        foodQty += qty;
-                    }
-                }
-            });
+            if (item.id >= 1000) {
+                drinkQty += qty;
+            } else if (item.id !== 908) {
+                foodQty += qty;
+            }
         });
 
         let finalTotal = subTotal;
-        message += `--------------------------\n🍲 餐点 / Món ăn: ${foodQty}\n🥤 饮料 / Đồ uống: ${drinkQty}\n`;
+        message += `--------------------------\n🍲 餐點 / Món ăn: ${foodQty}\n🥤 飲料 / Đồ uống: ${drinkQty}\n`;
 
         if (tableNo === 'room') {
             finalTotal += DELIVERY_FEE;
@@ -584,38 +1166,54 @@ async function sendToTelegram() {
         }
         message += `💰 Total: $${finalTotal.toFixed(2)}`;
 
-        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-        
-        const response = await fetch(url, {
+        if (customerNote) {
+            message += `\n📝 備註 / Ghi chú: ${customerNote}`;
+        }
+
+        // 🔒 安全送往 Google Apps Script 中繼站
+        const payload = {
+            message: message,
+            orderType: orderType,
+            orderTarget: orderTarget,
+            summary: summaryList.join(", "),
+            total: finalTotal,
+            note: customerNote
+        };
+
+        const response = await fetch(GAS_RELAY_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message
-            }),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
             signal: controller.signal
         });
 
         clearTimeout(timeoutId);
 
-        if (response.ok) {
-            let feeText = (tableNo === 'room') ? 
-                (currentLang === 'zh' ? ` (含$${DELIVERY_FEE.toFixed(2)}运费)` : ` (Incl. $${DELIVERY_FEE.toFixed(2)} fee)`) : "";
-            
-            alert(`${i18nMsgs.success[currentLang] || i18nMsgs.success.zh}\n总计: $${finalTotal.toFixed(2)}${feeText}`);
-            cart = {}; 
-            window.location.href = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&status=done&lang=" + currentLang;
-        } else {
-            throw new Error('API Error');
+        if (tg?.HapticFeedback) {
+            try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
         }
+
+        let feeText = (tableNo === 'room') ? 
+            (currentLang === 'zh' ? ` (含$${DELIVERY_FEE.toFixed(2)}運費)` : ` (Incl. $${DELIVERY_FEE.toFixed(2)} fee)`) : "";
+        
+        alert(`${i18nMsgs.success[currentLang] || i18nMsgs.success.zh}\n總計: $${finalTotal.toFixed(2)}${feeText}`);
+        
+        cart = {}; 
+
+        if (isTG) {
+            // 在 Telegram 內下單完畢直接優雅關閉小程式視窗
+            setTimeout(() => {
+                try { tg.close(); } catch(e) {}
+            }, 600);
+        } else {
+            window.location.href = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&status=done&lang=" + currentLang;
+        }
+
     } catch (e) {
         clearTimeout(timeoutId);
         isSubmitting = false; 
         updateSummary();
-        const errorHint = currentLang === 'zh' ? 
-            "⚠️ 传送超时或失败。\n请点击右上角「...」选择『在浏览器开启』再下单！" : 
-            "⚠️ Send failed or timeout.\nPlease click '...' and select 'Open in Browser' to order.";
-        alert(errorHint);
+        alert(i18nMsgs.error[currentLang] || i18nMsgs.error.zh);
     }
 }
 
@@ -625,11 +1223,17 @@ function setLang(lang) {
     window.history.replaceState({}, document.title, newUrl);
     render(); 
 }
-function switchCat(index) { currentCatIndex = index; render(); document.getElementById('content').scrollTop = 0; }
+
+function switchCat(index) { 
+    currentCatIndex = index; 
+    render(); 
+    document.getElementById('content').scrollTop = 0; 
+}
 
 window.addEventListener('load', () => {
     cart = {}; 
     render();
+    checkStatusDone();
 });
 
 setInterval(updateSummary, 60000);
