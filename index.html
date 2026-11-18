@@ -452,7 +452,7 @@
 const GAS_RELAY_URL = 'https://script.google.com/macros/s/AKfycbxmz1NLo94EoVhqJKW7IT1Psvp5-O5fuBkrH0w-1HeTPpSF_4afjvpUBnnLRDNf6X18Xw/exec';
 
 const OPEN_HOUR = 7; 
-const CLOSE_HOUR = 24; 
+const CLOSE_HOUR = 23; 
 
 // 🚨 臨時店休開關：true 為休息（禁止點餐），false 為營業
 const IS_CLOSED_TODAY = false; 
@@ -462,7 +462,7 @@ const IS_DELIVERY_ENABLED = true;
 
 // --- 公寓配送配置 ---
 const ROOM_DELIVERY_START = 9; 
-const ROOM_DELIVERY_END = 24;   
+const ROOM_DELIVERY_END = 14;   
 const DELIVERY_FEE = 0.5;       
 const MIN_ROOM_AMOUNT = 2.0;    
 
@@ -581,7 +581,7 @@ const EXTRA_EGG = { id: 902, name: { zh: "加購煎蛋(全熟)", en: "Add Fried 
 const EXTRA_EGG_SOFT = { id: 903, name: { zh: "加購煎蛋(半熟)", en: "Add Fried Egg (Over Easy)", km: "បន្ថែមពងទាចៀន (ជ័រភ្នៅ)", vi: "Thêm trứng chiên (Lòng đào)", ja: "目玉焼き(半熟)追加", ko: "계란후라이(반숙) 추가" }, price: 0.6, img: "img/EGG.PNG" };
 const EXTRA_EGG_GREEN = { id: 904, name: { zh: "加購蔥蛋", en: "Add Scallion Omelet", km: "បន្ថែមពងទាចៀនស្លឹកខ្ទឹម", vi: "Thêm trứng chiên hành", ja: "ネギ入り卵焼き追加", ko: "파계란말이 추가" }, price: 0.6, img: "img/segg.png" };
 const EXTRA_BAGUETTE = { id: 905, name: { zh: "加購短法棍(2個)", en: "Add Short Baguette (2 pcs)", km: "បន្ថែមនំបុ័ង (2)", vi: "Thêm bánh mì ngắn (2 cái)", ja: "ミニバゲット(2個)追加", ko: "미니 바게토(2개) 추가" }, price: 0.5, img: "img/IMG_2583.PNG" };
-const EXTRA_BEEF = { id: 906, name: { zh: "加購牛肉", en: "Add Beef", km: "បន្ថែមសាច់គោ", vi: "Thêm thịt bò", ja: "牛肉追加", ko: "소고기 추가" }, price: 1.0, img: "img/IMG_2263.PNG" };
+const EXTRA_BEEF = { id: 906, name: { zh: "加購牛肉", en: "Add Beef", km: "បន្ថែមសាច់គោ", vi: "Thêm thịt bò", ja: "牛肉追加", ko: "소고기 추가" }, price: 1.0, img: "img/NO.png" };
 const EXTRA_MEATBALL = { id: 907, name: { zh: "加購牛肉丸", en: "Add Beef Meatballs", km: "បន្ថែមប្រហិតសាច់គោ", vi: "Thêm bò viên", ja: "牛肉団子追加", ko: "소고기 완자 추가" }, price: 1.0, img: "img/NO.png" };
 const SWAP_EGG = { id: 908, isSwap: true, name: { zh: "🔥 煎蛋換蔥蛋 (限飯類)", en: "🔥 Swap Fried Egg for Scallion Omelet", km: "🔥 ដូរពងទាចៀនទៅពងទាចៀនស្លឹកខ្ទឹម", vi: "🔥 Đổi trứng chiên thành trứng hành", ja: "🔥 目玉焼きをネギ入り卵焼きに変更", ko: "🔥 계란후라이를 파계란말이로 변경" }, price: 0, img: "img/segg.png" };
 const EXTRA_COFFEE = { id: 1001, name: { zh: "加購越南煉乳咖啡", en: "Add VN Coffee w/ Milk", km: "បន្ថែមការហ្វេទឹកដោះគោ", vi: "Thêm cà phê sữa đá", ja: "ベトナムミルクコーヒー追加", ko: "베트남 연유커피 추가" }, price: 1, img: "img/MILKCOFEE.png" };
