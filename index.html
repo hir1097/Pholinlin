@@ -388,7 +388,6 @@
         <span id="table-banner-text">📍 載入中...</span>
         <span id="table-mode-badge" style="font-size:11px; opacity:0.8;"></span>
     </div>
-    <div id="success-banner" class="success-banner"></div>
 </header>
 
 <div class="main">
@@ -462,7 +461,7 @@ const IS_DELIVERY_ENABLED = true;
 
 // --- 公寓配送配置 ---
 const ROOM_DELIVERY_START = 9; 
-const ROOM_DELIVERY_END = 14;   
+const ROOM_DELIVERY_END = 24;   
 const DELIVERY_FEE = 0.5;       
 const MIN_ROOM_AMOUNT = 2.0;    
 
@@ -765,14 +764,7 @@ function updateTableBanner() {
 }
 
 function checkStatusDone() {
-    if (urlStatus === 'done') {
-        const banner = document.getElementById('success-banner');
-        banner.innerText = i18nMsgs.success[currentLang] || i18nMsgs.success.zh;
-        banner.style.display = 'block';
-        setTimeout(() => {
-            banner.style.display = 'none';
-        }, 8000);
-    }
+    // 依需求取消頁面綠色提示文字展示
 }
 
 function render() {
@@ -1097,7 +1089,13 @@ async function executeSubmitOrder(extraParams = {}) {
     updateSummary();
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); 
+    const timeoutId = setTimeout(() => controller.abort(), 20000); 
+
+    let wasBackgrounded = false;
+    const handleVisibilityChange = () => {
+        if (document.hidden) wasBackgrounded = true;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     try {
         const roomInfo = extraParams.roomInfo || localStorage.getItem('pholinlin_room_no') || "";
@@ -1177,17 +1175,23 @@ async function executeSubmitOrder(extraParams = {}) {
             orderTarget: orderTarget,
             summary: summaryList.join(", "),
             total: finalTotal,
-            note: customerNote
+            note: customerNote,
+            userId: tgUser ? tgUser.id : null,
+            userName: tgUser ? tgUser.first_name : "",
+            userHandle: tgUser ? (tgUser.username ? `@${tgUser.username}` : "") : "",
+            roomInfo: (tableNo === 'room') ? roomInfo : ""
         };
 
         const response = await fetch(GAS_RELAY_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload),
-            signal: controller.signal
+            signal: controller.signal,
+            keepalive: true
         });
 
         clearTimeout(timeoutId);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
 
         if (tg?.HapticFeedback) {
             try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
@@ -1206,13 +1210,25 @@ async function executeSubmitOrder(extraParams = {}) {
                 try { tg.close(); } catch(e) {}
             }, 600);
         } else {
-            window.location.href = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&status=done&lang=" + currentLang;
+            // 下單完成不再附帶 status=done，不再展示綠色提示文字
+            window.location.href = window.location.pathname + "?table=" + encodeURIComponent(tableNo) + "&lang=" + currentLang;
         }
 
     } catch (e) {
         clearTimeout(timeoutId);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
         isSubmitting = false; 
         updateSummary();
+
+        // 🚨 關鍵防護：若用戶在送出時把 Safari 縮到後台（例如跳去 TG 群組看有沒有收到），
+        // iOS 會暫停頁面並中斷前端連線，但後端其實早就成功收到並送出 TG 了！
+        // 此時切回前台絕不要彈出「超時失敗」嚇客人，直接清空購物車即可：
+        if (wasBackgrounded) {
+            cart = {};
+            render();
+            return;
+        }
+
         alert(i18nMsgs.error[currentLang] || i18nMsgs.error.zh);
     }
 }
